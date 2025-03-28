@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:ontop/ha_api.dart';
+import 'package:ontop/entities.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,10 +12,10 @@ void main() async {
 
   // Configure the window properties
   windowManager.waitUntilReadyToShow().then((_) async {
-    await windowManager.setTitle('Always on Top Example');
-    await windowManager.setSize(const Size(500, 600));
+    await windowManager.setTitle('ontop');
+    await windowManager.setSize(const Size(250, 150));
     await windowManager.setAlwaysOnTop(true); // Set the window to stay on top
-    await windowManager.setOpacity(80);
+    await windowManager.setOpacity(20);
     await windowManager.setBackgroundColor(Colors.blue);
     //await windowManager.setAsFrameless();
     await windowManager.show();
@@ -22,6 +23,8 @@ void main() async {
 
   runApp(const MyApp());
 }
+
+String displayValues = "test";
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -49,7 +52,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page - ONTOP'),
+      home: const MyHomePage(title: ''),
     );
   }
 }
@@ -74,13 +77,28 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  List? fromAPI;
+  List? fromAPI = [" ", " ", " ", " "];
+
+  @override
+  void initState() {
+    super.initState();
+    _readAPI(); // Start fetching API data as soon as the widget loads
+  }
 
   void _readAPI() async {
     while (true) {
-      await Future.delayed(const Duration(seconds: 1)); // ⏳ Wait for 1 second
-      var dataAPI = await fetchHomeAssistantStates();
-      print("void _readAPI()>>>> $fromAPI");
+      await Future.delayed(
+        const Duration(milliseconds: 500),
+      ); // ⏳ Wait for 1 second
+      /*var dataAPI1 = await fetchHomeAssistantStates(
+        "sensor.axking_get_status_ac_output_active_power",
+      );
+      var dataAPI2 = await fetchHomeAssistantStates(
+        "sensor.axking_get_status_pv_input_power",
+      );
+      //print("void _readAPI()>>>> $fromAPI");
+*/
+      launch();
       setState(() {
         // This call to setState tells the Flutter framework that something has
         // changed in this State, which causes it to rerun the build method below
@@ -88,7 +106,11 @@ class _MyHomePageState extends State<MyHomePage> {
         // _counter without calling setState(), then the build method would not be
         // called again, and so nothing would appear to happen.
         _counter++;
-        fromAPI = dataAPI;
+        fromAPI = ["", displayValues];
+
+        //fromAPI = dataAPI1 + dataAPI2;
+        //launch();
+        print("displayValues = $displayValues, fromAPI 0 $fromAPI");
       });
     }
   }
@@ -102,15 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Color.fromRGBO(40, 48, 43, 0.016),
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
+      appBar: null,
       backgroundColor: Colors.blueGrey, //background color for main deck
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
@@ -129,20 +143,30 @@ class _MyHomePageState extends State<MyHomePage> {
           // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('Data read from HA API:'),
+            //const Text('Data read from HA API:'),
+            
             Text(
-              'response $_counter-$fromAPI',
-              style: Theme.of(context).textTheme.headlineMedium,
+              fromAPI?[1], //"Load: " + fromAPI?[1] + " PV: " + fromAPI?[3]
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Colors.yellow, // Override text color
+                fontSize: 20,
+                fontFamily: 'Roboto', // Override font size
+                fontWeight: FontWeight.bold, // Optional: Modify weight
+              ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _readAPI,
-        tooltip: 'fetchHomeAssistantStates',
-        child: const Icon(Icons.add),
+      floatingActionButton: SizedBox(
+        width: 25, // Custom width
+        height: 25, // Custom height
+        child: FloatingActionButton(
+          onPressed: launch,
+          tooltip: 'Settings',
+          child: const Icon(Icons.add, size: 15), // Make the icon smaller
+        ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
