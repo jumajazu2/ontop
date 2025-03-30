@@ -28,13 +28,15 @@ String jsonEntities = '''
 Map<String, dynamic> jsonData = jsonDecode(jsonEntities);
 //List<TextSpan> spanResults = [];
 //List<Padding> paddingResults = [];
-List<dynamic> listResults = [];
+List<dynamic>? listResults = [];
 
-Future<String> createTextSpan(
+Future createTextSpan(
   jsonData,
 ) async //create textspan with current values to be displayed
 {
   var output = "";
+
+  listResults = [];
   //print(jsonData);
   var numberEntities = jsonData["entities"].length;
 
@@ -49,13 +51,13 @@ Future<String> createTextSpan(
     ); //read value from API
     var name = jsonData["entities"][index]["name"];
     var unit = jsonData["entities"][index]["unit"];
-    var icon = jsonData["entities"][index]["icon"];
+    String icon = jsonData["entities"][index]["icon"];
 
     //contruct result
 
     output = output + " " + name + " " + readFromApi[1] + " " + unit + " | ";
 
-    listResults.add(
+    listResults?.add(
       [name, icon, readFromApi[1], unit],
     ); // each reported entity has a sublist with items in this order: name, icon, value, unit, type, (alert)
 
@@ -67,9 +69,10 @@ Future<String> createTextSpan(
   }
   //print(output);
   displayValues = output;
+  resultsOut = listResults;
   print(displayValues);
   print(listResults);
-  return displayValues;
+  return resultsOut;
 }
 
 void launch() {

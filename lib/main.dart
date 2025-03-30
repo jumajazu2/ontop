@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ontop/generate_table.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:ontop/ha_api.dart';
@@ -75,6 +76,8 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+List? resultsOut = [" ", " ", " ", " "];
+
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   List? fromAPI = [" ", " ", " ", " "];
@@ -145,8 +148,9 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            GenerateTable(listResults: [resultsOut]),
             //const Text('Data read from HA API:'),
-            
+            /*
             Text(
               fromAPI?[1], //"Load: " + fromAPI?[1] + " PV: " + fromAPI?[3]
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -155,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 fontFamily: 'Roboto', // Override font size
                 fontWeight: FontWeight.bold, // Optional: Modify weight
               ),
-            ),
+            ),*/
           ],
         ),
       ),
