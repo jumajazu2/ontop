@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:ontop/ha_api.dart';
+//import 'package:ontop/ha_api.dart';
 import 'package:ontop/entities.dart';
 import 'package:ontop/icons.dart';
 
 class GenerateTable extends StatelessWidget {
-  List<dynamic> listResults = [
-    ["test", "test", "test", "test"],
-  ];
+  final List listResults;
 
-  GenerateTable({required this.listResults});
+  // List<dynamic> listResults = [    ["test", "test", "test", "test", "test"],  ];
+
+  const GenerateTable({super.key, required this.listResults});
 
   @override
   Widget build(BuildContext context) {
     // Helper function to chunk a list into sublists of a specific size (e.g., 5 columns per row)
+    print("at the entry to GenerateTable: $listResults");
+    print(listResults[0].length);
     List<List> chunkList(List list, int chunkSize) {
       List<List> chunks = [];
       for (int i = 0; i < list.length; i += chunkSize) {
@@ -31,18 +33,16 @@ class GenerateTable extends StatelessWidget {
       children:
           listResults.asMap().entries.expand((entry) {
             int index = entry.key; // The index of the main list
-            List sublist =
-                entry
-                    .value; // Access the sublist (e.g., ["Load", "bolt", 288, "W"])
+            List sublist = entry.value;
 
-            // Split the sublist into chunks of 5 items each
-            List<List> chunkedSublist = chunkList(sublist, 5);
+            // Split the sublist into chunks of X items each
+            List<List> chunkedSublist = chunkList(sublist, 4);
 
             // Return a list of TableRow widgets for each chunk
             return chunkedSublist.map((chunk) {
               // Ensure each chunk has 5 items by adding empty widgets
-              while (chunk.length < 5) {
-                chunk.add(["", "", "", ""]);
+              while (chunk.length < 4) {
+                chunk.add(["", "", "", "", ""]);
               }
 
               return TableRow(
@@ -54,6 +54,8 @@ class GenerateTable extends StatelessWidget {
                       // Trim item[1] to remove any leading/trailing spaces
                       String iconKey =
                           item[1]?.toString().trim().toLowerCase() ?? '';
+                      String iconCol =
+                          item[4]?.toString().trim().toLowerCase() ?? '';
 
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
@@ -66,26 +68,36 @@ class GenerateTable extends StatelessWidget {
                                       ? iconMap[iconKey]
                                       : Icons
                                           .warning, // Fallback to warning icon if not found
-                                  color: Colors.green,
+                                  color: iconColor[iconCol],
                                 )
                                 : Text(
                                   item[0], // Display name if no icon is specified
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.amber,
+                                  ),
                                 ),
-                            SizedBox(width: 8.0), // Space between icon and text
+                            SizedBox(width: 4.0), // Space between icon and text
                             // Display the value from item[2]
                             Text(
                               item[2]
                                   .toString(), // Display value (from item[2])
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                                fontSize: 16,
+                              ),
                             ),
                             SizedBox(
-                              width: 8.0,
+                              width: 2.0,
                             ), // Space between value and unit
                             // Display the unit from item[3]
                             Text(
                               item[3].toString(), // Display unit (from item[3])
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                             ),
                           ],
                         ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:ontop/generate_table.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:http/http.dart' as http;
-import 'package:ontop/ha_api.dart';
+//import 'package:http/http.dart' as http;
+//import 'package:ontop/ha_api.dart';
 import 'package:ontop/entities.dart';
+import 'package:ontop/settings.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,18 +16,24 @@ void main() async {
   // Configure the window properties
   windowManager.waitUntilReadyToShow().then((_) async {
     await windowManager.setTitle('ontop');
-    await windowManager.setSize(const Size(250, 150));
+    await windowManager.setSize(const Size(500, 200));
     await windowManager.setAlwaysOnTop(true); // Set the window to stay on top
     await windowManager.setOpacity(20);
     await windowManager.setBackgroundColor(Colors.blue);
     //await windowManager.setAsFrameless();
     await windowManager.show();
+    //await windowManager.setTitleBarStyle(TitleBarStyle.hidden,  windowButtonVisibility: true, );
   });
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => SettingsProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
-
-String displayValues = "test";
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -34,7 +42,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'ontop – lightweight Home Assistant viewer',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -53,10 +61,12 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: ''),
+      home: MyHomePage(title: 'ontop', key: myHomePageKey),
     );
   }
 }
+
+final GlobalKey<_MyHomePageState> myHomePageKey = GlobalKey<_MyHomePageState>();
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -76,11 +86,28 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-List? resultsOut = [" ", " ", " ", " "];
+List? resultsOut = [
+  [" ", " ", " ", " ", " "],
+  [" ", " ", " ", " ", " "],
+];
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  List? fromAPI = [" ", " ", " ", " "];
+  //int _counter = 0;
+  List? fromAPI = [" ", " ", " ", " ", " "];
+
+  void resizeWindow() async {
+    await windowManager.setSize(const Size(800, 500));
+  }
+
+  void dataError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -102,19 +129,22 @@ class _MyHomePageState extends State<MyHomePage> {
       //print("void _readAPI()>>>> $fromAPI");
 */
       launch();
+      setState(() {}); //rebuild Widget build
+      /*
+      
       setState(() {
         // This call to setState tells the Flutter framework that something has
         // changed in this State, which causes it to rerun the build method below
         // so that the display can reflect the updated values. If we changed
         // _counter without calling setState(), then the build method would not be
         // called again, and so nothing would appear to happen.
-        _counter++;
-        fromAPI = ["", displayValues];
+        //_counter++;
+        //fromAPI = ["", displayValues];
 
         //fromAPI = dataAPI1 + dataAPI2;
         //launch();
-        print("displayValues = $displayValues, fromAPI 0 $fromAPI");
-      });
+        //print("displayValues = $displayValues, fromAPI 0 $fromAPI");
+      }); */
     }
   }
 
@@ -128,7 +158,12 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       appBar: null,
-      backgroundColor: Colors.blueGrey, //background color for main deck
+      backgroundColor: const Color.fromARGB(
+        255,
+        148,
+        167,
+        176,
+      ), //background color for main deck
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
@@ -148,7 +183,10 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            GenerateTable(listResults: [resultsOut]),
+            GenerateTable(
+              listResults: [resultsOut!],
+              //adds [] to the list, making it nested one more level
+            ),
             //const Text('Data read from HA API:'),
             /*
             Text(
@@ -167,7 +205,9 @@ class _MyHomePageState extends State<MyHomePage> {
         width: 25, // Custom width
         height: 25, // Custom height
         child: FloatingActionButton(
-          onPressed: launch,
+          onPressed: () {
+            showSettingsPopup(context);
+          },
           tooltip: 'Settings',
           child: const Icon(Icons.add, size: 15), // Make the icon smaller
         ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ontop/generate_table.dart';
+//import 'package:ontop/generate_table.dart';
 
 // Map of icon names (strings) to IconData
 final Map<String, IconData> iconMap = {
@@ -82,4 +82,15 @@ final Map<String, IconData> iconMap = {
   'gavel': Icons.gavel,
   'science': Icons.science,
   'construction': Icons.construction,
+  'fan': Icons.air,
+};
+
+final Map<String, Color> iconColor = {
+  'red': Colors.red,
+  'green': Colors.green,
+  'blue': Colors.blue,
+  'white': Colors.white,
+  'black': Colors.black,
+  'yellow': Colors.yellowAccent,
+  'orange': Colors.orangeAccent,
 };
