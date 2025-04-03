@@ -1,16 +1,10 @@
-# ontop
+# ontop - Home Assistant Monitoring Tool
 
-A new Flutter project.
+"ontop" is a lightweight Home Assistant viewer, currently available for Windows.
+It is intended to provide an unobtrusive way of constatnly seeing/monitoring key entities from a Home Assistant system, displayed in a (small) customisable window on top of any other windows.
+To check the key entities, the user does not have to switch to a browser windows to check the complete Home Assistant dashboard, but has the selected entities available at a glance.
 
-## Getting Started
+<img width="368" alt="image" src="https://github.com/user-attachments/assets/021d0c35-5008-4b49-a007-662c779b8e0d" />
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
