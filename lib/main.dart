@@ -6,6 +6,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:ontop/entities.dart';
 import 'package:ontop/settings.dart';
 import 'package:provider/provider.dart';
+import 'package:collection/collection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -91,15 +92,26 @@ List? resultsOut = [
   [" ", " ", " ", " ", " "],
 ];
 
+List? resultsOutPrevious = [
+  [" ", " ", " ", " ", " "],
+  [" ", " ", " ", " ", " "],
+];
+
 class _MyHomePageState extends State<MyHomePage> {
   //int _counter = 0;
   List? fromAPI = [" ", " ", " ", " ", " "];
-
+  DateTime? lastBuildTime; // Store the last build time
   void resizeWindow() async {
     await windowManager.setSize(const Size(800, 500));
   }
 
-  void dataError(String message) {
+  int secondsSinceLastBuild() {
+    if (lastBuildTime == null) return -1; // No previous build
+
+    return DateTime.now().difference(lastBuildTime!).inSeconds;
+  }
+
+  Future dataError(String message) async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -129,7 +141,27 @@ class _MyHomePageState extends State<MyHomePage> {
       //print("void _readAPI()>>>> $fromAPI");
 */
       launch();
-      setState(() {}); //rebuild Widget build
+      print(("Data has not updated for"));
+      var sinceLastBuild = secondsSinceLastBuild();
+      print(sinceLastBuild);
+      print(lastBuildTime);
+      if (sinceLastBuild > 10) {
+        await dataError("Data has not updated for $sinceLastBuild s");
+      }
+
+      print("Previous $resultsOutPrevious");
+      print("New $resultsOut");
+
+      final listEquals = const DeepCollectionEquality().equals;
+
+      if (!listEquals(resultsOutPrevious, resultsOut)) {
+        lastBuildTime = DateTime.now();
+        resultsOutPrevious = List.from(resultsOut ?? []); // Make a copy
+        print("List updated at $lastBuildTime");
+      } // Update the last build time
+      setState(
+        () {},
+      ); //rebuild Widget build, seems to rebuild even without this
       /*
       
       setState(() {
