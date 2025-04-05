@@ -1,0 +1,82 @@
+{
+    "entities": [
+        {
+            "entityHA": "sensor.axking_get_status_ac_output_active_power",
+            "type": "value",
+            "name": "Load",
+            "icon": "bolt",
+            "icon_color": "red",
+            "unit": "W"
+        },
+        {
+            "entityHA": "sensor.axking_get_status_pv_input_power",
+            "type": "value",
+            "name": "PV",
+            "icon": "solar_power",
+            "icon_color": "yellow",
+            "unit": "W"
+        },
+        {
+            "entityHA": "sensor.axking_get_status_battery_voltage",
+            "type": "value",
+            "name": "Batt",
+            "icon": "battery_3_bar",
+            "icon_color": "blue",
+            "unit": "V"
+        },
+        {
+            "entityHA": "sensor.battery_current",
+            "type": "value",
+            "name": "Current",
+            "icon": "battery_charging_full",
+            "icon_color": "blue",
+            "unit": "A"
+        },
+        {
+            "entityHA": "sensor.shellygas_3c6105f65548_gas_concentration",
+            "type": "value",
+            "name": "Gas",
+            "icon": "report_problem_outlined",
+            "icon_color": "orange",
+            "unit": "ppm"
+        },
+        {
+            "entityHA": "sensor.esphome_web_499a10_sht40_temperature",
+            "type": "value",
+            "name": "DHW",
+            "icon": "device_thermostat",
+            "icon_color": "red",
+            "unit": "C"
+        },
+        {
+            "entityHA": "sensor.axking_get_status_inverter_charge_status",
+            "type": "value",
+            "name": "SCC",
+            "icon": "solar_power_outlined",
+            "icon_color": "white",
+            "unit": ""
+        },
+        {
+            "entityHA": "switch.tapo_plug_2",
+            "type": "switch",
+            "name": "Extractor",
+            "icon": "fan",
+            "icon_color": "orange",
+            "unit": ""
+        }
+    ],
+    "settings": [
+        {
+            "bg_color": "default",
+            "text_color": "white",
+            "text_size": "16"
+        }
+    ],
+    "API": [
+        {
+            "baseURL": "http://192.168.1.28:8123",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiMjY5NzU1ZTQyMDc0ZjAwOGYyMzdkZGJkZTAwMzcxNCIsImlhdCI6MTczMDg4NzMzNywiZXhwIjoyMDQ2MjQ3MzM3fQ.HhnvhyCZLG-HqtW8-KhoHrZkpmNq292hRjNli5D5qAY",
+            "Content-Type": "application/json"
+        }
+    ]
+}

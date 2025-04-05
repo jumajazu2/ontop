@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:ontop/ha_api.dart';
 import 'package:ontop/main.dart';
+import 'dart:io';
 //import 'package:flutter/widgets.dart';
 
 //manually defined JSON of entities to show, as nested list, format:, add possibility to format(line break, color, alarm-flashing/red
@@ -24,23 +25,23 @@ String jsonEntities = '''
       {"entityHA": "sensor.axking_get_status_inverter_charge_status", "type": "value", "name": "SCC", "icon":"solar_power_outlined", "icon_color":"white", "unit": ""},
       {"entityHA": "switch.tapo_plug_2", "type": "switch", "name": "Extractor", "icon":"fan", "icon_color":"orange", "unit": ""}
     ],
-    "settings": [{"bg_color": "default", "text_color": "white", "text_size": "16"}]
+    "settings": [{"bg_color": "default", "text_color": "white", "text_size": "16"}],
+    "API": [{"baseURL": "http://192.168.1.28:8123",
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiMjY5NzU1ZTQyMDc0ZjAwOGYyMzdkZGJkZTAwMzcxNCIsImlhdCI6MTczMDg4NzMzNywiZXhwIjoyMDQ2MjQ3MzM3fQ.HhnvhyCZLG-HqtW8-KhoHrZkpmNq292hRjNli5D5qAY", 
+    "Content-Type": "application/json"}]
   }
   ''';
 
-Map<String, dynamic> jsonData = jsonDecode(jsonEntities);
-//List<TextSpan> spanResults = [];
-//List<Padding> paddingResults = [];
+//Map<String, dynamic> jsonData = jsonDecode(jsonEntities);
+
 List<dynamic>? listResults = [];
 
 Future createTextSpan(
   jsonData,
 ) async //create textspan with current values to be displayed
 {
-  //ar output = "";
-
   listResults = [];
-  //print(jsonData);
+
   var numberEntities = jsonData["entities"].length;
 
   print("Number of entities is $numberEntities");
@@ -51,16 +52,22 @@ Future createTextSpan(
   for (var index = 0; index < numberEntities; index++) {
     var readentity =
         jsonData["entities"][index]["entityHA"]; //read entity for each iteration by index
+
+    var authorization = jsonData["API"][0]["Authorization"];
+    var contentType = jsonData["API"][0]["Content-Type"];
+    var headers = {
+      "Authorization": "$authorization",
+      "Content-Type": "$contentType",
+    };
+
     var readFromApi = await fetchHomeAssistantStates(
       readentity,
+      jsonData["API"][0]["baseURL"],
+      headers,
     ); //read value from API
     String name = jsonData["entities"][index]["name"];
     String unit = jsonData["entities"][index]["unit"];
     String icon = jsonData["entities"][index]["icon"];
-
-    //contruct result
-
-    //output = output + " " + name + " " + readFromApi[1] + " " + unit + " | ";
 
     listResults?.add(
       [

@@ -1,3 +1,7 @@
+//import 'dart:nativewrappers/_internal/vm/lib/math_patch.dart';
+
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:ontop/generate_table.dart';
 import 'package:window_manager/window_manager.dart';
@@ -7,6 +11,8 @@ import 'package:ontop/entities.dart';
 import 'package:ontop/settings.dart';
 import 'package:provider/provider.dart';
 import 'package:collection/collection.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -97,6 +103,26 @@ List? resultsOutPrevious = [
   [" ", " ", " ", " ", " "],
 ];
 
+Map<String, dynamic> jsonData = {};
+
+Future<void> loadJsonFromFile() async {
+  try {
+    // Read the JSON file
+    final file = File(
+      'c:/Users/Juraj/Documents/IT/Flutter/ontop/ontop/lib/config.json',
+    );
+    final jsonString = await file.readAsString();
+
+    // Decode the JSON
+    jsonData = jsonDecode(jsonString);
+    myHomePageKey.currentState?.dataError("Config loaded successfully");
+    print("JSON loaded successfully: $jsonData");
+  } catch (e) {
+    myHomePageKey.currentState?.dataError("Error loading JSON: $e");
+    print("Error loading JSON: $e");
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   //int _counter = 0;
   List? fromAPI = [" ", " ", " ", " ", " "];
@@ -111,7 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return DateTime.now().difference(lastBuildTime!).inSeconds;
   }
 
-  Future dataError(String message) async {
+  void dataError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -124,6 +150,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    loadJsonFromFile(); // Load JSON data from file
+
     _readAPI(); // Start fetching API data as soon as the widget loads
   }
 
@@ -146,7 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print(sinceLastBuild);
       print(lastBuildTime);
       if (sinceLastBuild > 10) {
-        await dataError("Data has not updated for $sinceLastBuild s");
+        dataError("Data has not updated for $sinceLastBuild s");
       }
 
       print("Previous $resultsOutPrevious");
@@ -158,6 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
         lastBuildTime = DateTime.now();
         resultsOutPrevious = List.from(resultsOut ?? []); // Make a copy
         print("List updated at $lastBuildTime");
+        sinceLastBuild = 0;
       } // Update the last build time
       setState(
         () {},
