@@ -93,7 +93,7 @@ Future createTextSpan(
 
   if (numberEntities != resultsOut!.length) {
     myHomePageKey.currentState?.dataError(
-      "Data Lenght Error",
+      "Data Length Error, expected $numberEntities, received ${resultsOut!.length}",
     ); //if the number of items in JSON and the resultant list do not match, replace with a default list
     List _listResults = [];
     for (var index = 0; index < numberEntities; index++) {
@@ -102,7 +102,7 @@ Future createTextSpan(
     }
     int resultsOutLength = resultsOut!.length;
     print(
-      "default empty list created due to data lenght mismatch --- $listResults", //the variable is local, does not affect listResults
+      "default empty list created due to data length mismatch --- $listResults", //the variable is local, does not affect listResults
     );
     print(resultsOutLength);
     print(numberEntities);

@@ -67,9 +67,11 @@
     ],
     "settings": [
         {
-            "bg_color": "default",
+            "bg_color": "red",
             "text_color": "white",
-            "text_size": "16"
+            "text_size": "16",
+            "opacity": 0.9,
+            "ontop": "true"            
         }
     ],
     "API": [

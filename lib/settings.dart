@@ -1,19 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:ontop/main.dart';
+import 'package:ontop/file_handling.dart';
 
 // Global state for settings (using Provider)
 class SettingsProvider extends ChangeNotifier {
   bool enableFeature = false;
-  double settingValue = 50.0;
+  double opacityValue =
+      jsonData["settings"][0]["opacity"] * 100 ?? 90.0; // Default value
 
   void toggleFeature(bool value) {
     enableFeature = value;
     notifyListeners();
   }
 
-  void updateSettingValue(double value) {
-    settingValue = value;
+  void updateOpacityValue(double value) {
+    opacityValue = value;
+
+    if (opacityValue > 20) {
+      windowManager.setOpacity(opacityValue / 100);
+    }
+    jsonData["settings"][0]["opacity"] =
+        opacityValue / 100; //update JSON data with new opacity value
+    writeJsonToFile(
+      jsonData,
+    ); //write new JSON data to file so that it loads next time at startup
+
     notifyListeners();
   }
 }
@@ -76,13 +89,13 @@ void showSettingsPopup(BuildContext context) {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Setting Value: ${settings.settingValue.toInt()}"),
+                    Text("Transparency: ${settings.opacityValue.toInt()}"),
                     Slider(
-                      min: 0,
+                      min: 20,
                       max: 100,
-                      value: settings.settingValue,
+                      value: settings.opacityValue,
                       onChanged: (value) {
-                        settings.updateSettingValue(value);
+                        settings.updateOpacityValue(value);
                       },
                     ),
                   ],
@@ -104,7 +117,7 @@ void showSettingsPopup(BuildContext context) {
     },
   );
 }
-
+/*
 void main() {
   runApp(
     ChangeNotifierProvider(
@@ -174,4 +187,4 @@ void centerWindow() async {
 
 
 
-*/
+*/*/

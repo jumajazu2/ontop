@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:ontop/generate_table.dart';
 import 'package:window_manager/window_manager.dart';
 //import 'package:http/http.dart' as http;
-//import 'package:ontop/ha_api.dart';
+import 'package:ontop/file_handling.dart';
 import 'package:ontop/entities.dart';
 import 'package:ontop/settings.dart';
 import 'package:provider/provider.dart';
@@ -19,14 +19,16 @@ void main() async {
 
   // Initialize window manager
   await windowManager.ensureInitialized();
+  await loadJsonFromFile(); // Load JSON config from file
 
   // Configure the window properties
   windowManager.waitUntilReadyToShow().then((_) async {
     await windowManager.setTitle('ontop');
     await windowManager.setSize(const Size(500, 200));
     await windowManager.setAlwaysOnTop(true); // Set the window to stay on top
-    await windowManager.setOpacity(20);
+    await windowManager.setOpacity(jsonData["settings"][0]["opacity"] ?? 0.9);
     await windowManager.setBackgroundColor(Colors.blue);
+    //await windowManager.setBackgroundColor(Colors.blue);
     //await windowManager.setAsFrameless();
     await windowManager.show();
     //await windowManager.setTitleBarStyle(TitleBarStyle.hidden,  windowButtonVisibility: true, );
@@ -73,7 +75,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
-final GlobalKey<_MyHomePageState> myHomePageKey = GlobalKey<_MyHomePageState>();
+final GlobalKey<_MyHomePageState> myHomePageKey =
+    GlobalKey<
+      _MyHomePageState
+    >(); //global key to display error messages in the main widget
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -105,6 +110,7 @@ List? resultsOutPrevious = [
 
 Map<String, dynamic> jsonData = {};
 
+/* moved to file_handling.dart
 Future<void> loadJsonFromFile() async {
   try {
     // Read the JSON file
@@ -122,7 +128,7 @@ Future<void> loadJsonFromFile() async {
     print("Error loading JSON: $e");
   }
 }
-
+*/
 class _MyHomePageState extends State<MyHomePage> {
   //int _counter = 0;
   List? fromAPI = [" ", " ", " ", " ", " "];
@@ -150,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    loadJsonFromFile(); // Load JSON data from file
+    //loadJsonFromFile(); // Load JSON data from file
 
     _readAPI(); // Start fetching API data as soon as the widget loads
   }
@@ -270,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
             showSettingsPopup(context);
           },
           tooltip: 'Settings',
-          child: const Icon(Icons.add, size: 15), // Make the icon smaller
+          child: const Icon(Icons.settings, size: 15), // Make the icon smaller
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
