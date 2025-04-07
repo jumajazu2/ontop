@@ -63,22 +63,24 @@
             "icon": "fan",
             "icon_color": "orange",
             "unit": ""
-        }
-    ],
-    "settings": [
+        },
         {
-            "bg_color": "red",
-            "text_color": "white",
-            "text_size": "16",
-            "opacity": 0.9,
-            "ontop": "true"            
+            "entityHA": "sensor.tapo_plug_18_current_power",
+            "type": "value",
+            "name": "DHW Power",
+            "icon": "flash_on",
+            "icon_color": "orange",
+            "unit": "W"
         }
     ],
+   
+    
     "API": [
         {
             "baseURL": "http://192.168.1.28:8123",
             "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiMjY5NzU1ZTQyMDc0ZjAwOGYyMzdkZGJkZTAwMzcxNCIsImlhdCI6MTczMDg4NzMzNywiZXhwIjoyMDQ2MjQ3MzM3fQ.HhnvhyCZLG-HqtW8-KhoHrZkpmNq292hRjNli5D5qAY",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "NabuCasaURL": "https://fvmxki1okz7hwx1y8hugh83n4fzji9tx.ui.nabu.casa"
         }
     ]
 }

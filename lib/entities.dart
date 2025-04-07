@@ -13,6 +13,7 @@ import 'dart:io';
 //icon_color - icon color or default
 //unit - as string
 //
+/*
 String jsonEntities = '''
   {
     "entities": [
@@ -31,7 +32,7 @@ String jsonEntities = '''
     "Content-Type": "application/json"}]
   }
   ''';
-
+*/
 //Map<String, dynamic> jsonData = jsonDecode(jsonEntities);
 
 List<dynamic>? listResults = [];
@@ -40,8 +41,8 @@ Future createTextSpan(
   jsonData,
 ) async //create textspan with current values to be displayed
 {
+  //listResults!.clear();
   listResults = [];
-
   var numberEntities = jsonData["entities"].length;
 
   print("Number of entities is $numberEntities");

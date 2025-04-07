@@ -20,13 +20,21 @@ void main() async {
   // Initialize window manager
   await windowManager.ensureInitialized();
   await loadJsonFromFile(); // Load JSON config from file
+  await loadSettingsFromFile();
 
   // Configure the window properties
   windowManager.waitUntilReadyToShow().then((_) async {
+    await windowManager.setTitleBarStyle(
+      TitleBarStyle.hidden, // Remove the title bar
+      windowButtonVisibility: false, // Hide window buttons
+    );
+    await windowManager.setResizable(true);
     await windowManager.setTitle('ontop');
     await windowManager.setSize(const Size(500, 200));
     await windowManager.setAlwaysOnTop(true); // Set the window to stay on top
-    await windowManager.setOpacity(jsonData["settings"][0]["opacity"] ?? 0.9);
+    await windowManager.setOpacity(
+      jsonSettings["settings"][0]["opacity"] ?? 0.9,
+    );
     await windowManager.setBackgroundColor(Colors.blue);
     //await windowManager.setBackgroundColor(Colors.blue);
     //await windowManager.setAsFrameless();
@@ -109,6 +117,7 @@ List? resultsOutPrevious = [
 ];
 
 Map<String, dynamic> jsonData = {};
+Map<String, dynamic> jsonSettings = {};
 
 /* moved to file_handling.dart
 Future<void> loadJsonFromFile() async {
@@ -131,6 +140,11 @@ Future<void> loadJsonFromFile() async {
 */
 class _MyHomePageState extends State<MyHomePage> {
   //int _counter = 0;
+
+  Offset _initialWindowOffset =
+      Offset.zero; // Cache the initial window position
+  Offset _dragStartOffset = Offset.zero; // Cache the drag start position
+
   List? fromAPI = [" ", " ", " ", " ", " "];
   DateTime? lastBuildTime; // Store the last build time
   void resizeWindow() async {
@@ -174,6 +188,8 @@ class _MyHomePageState extends State<MyHomePage> {
       );
       //print("void _readAPI()>>>> $fromAPI");
 */
+      //listResults!.clear(); // Clear the list before adding new data
+      resultsOut!.clear;
       launch();
       print(("Data has not updated for"));
       var sinceLastBuild = secondsSinceLastBuild();
@@ -217,68 +233,43 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: null,
-      backgroundColor: const Color.fromARGB(
-        255,
-        148,
-        167,
-        176,
-      ), //background color for main deck
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            GenerateTable(
-              listResults: [resultsOut!],
-              //adds [] to the list, making it nested one more level
-            ),
-            //const Text('Data read from HA API:'),
-            /*
-            Text(
-              fromAPI?[1], //"Load: " + fromAPI?[1] + " PV: " + fromAPI?[3]
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: Colors.yellow, // Override text color
-                fontSize: 20,
-                fontFamily: 'Roboto', // Override font size
-                fontWeight: FontWeight.bold, // Optional: Modify weight
-              ),
-            ),*/
-          ],
+      appBar: null, // No app bar to match frameless window
+      backgroundColor: const Color.fromARGB(255, 148, 167, 176),
+      body: GestureDetector(
+        onPanStart: (details) async {
+          // Cache the initial window position when the drag starts
+          _initialWindowOffset = await windowManager.getPosition();
+          _dragStartOffset = details.globalPosition;
+        },
+        onPanUpdate: (details) async {
+          // Calculate the new position based on the drag delta
+          final Offset dragDelta = details.globalPosition - _dragStartOffset;
+          final Offset newPosition = _initialWindowOffset + dragDelta;
+
+          // Update the window position
+          await windowManager.setPosition(newPosition);
+        },
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              GenerateTable(listResults: [resultsOut!]),
+            ],
+          ),
         ),
       ),
       floatingActionButton: SizedBox(
-        width: 25, // Custom width
-        height: 25, // Custom height
+        width: 25,
+        height: 25,
         child: FloatingActionButton(
           onPressed: () {
             showSettingsPopup(context);
           },
           tooltip: 'Settings',
-          child: const Icon(Icons.settings, size: 15), // Make the icon smaller
+          child: const Icon(Icons.settings, size: 15),
         ),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }

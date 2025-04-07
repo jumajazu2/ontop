@@ -3,12 +3,34 @@ import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:ontop/main.dart';
 import 'package:ontop/file_handling.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
+
+Future<void> savePreference(String key, String value) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString(key, value);
+  print("Preference saved: $key = $value");
+}
+
+Future<String?> getPreference(String key) async {
+  final prefs = await SharedPreferences.getInstance();
+  final value = prefs.getString(key);
+  print("Preference retrieved: $key = $value");
+  return value;
+}
+
+Future<void> removePreference(String key) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove(key);
+  print("Preference removed: $key");
+}
 
 // Global state for settings (using Provider)
 class SettingsProvider extends ChangeNotifier {
   bool enableFeature = false;
   double opacityValue =
-      jsonData["settings"][0]["opacity"] * 100 ?? 90.0; // Default value
+      jsonSettings["settings"][0]["opacity"] * 100 ?? 90.0; // Default value
 
   void toggleFeature(bool value) {
     enableFeature = value;
@@ -21,11 +43,9 @@ class SettingsProvider extends ChangeNotifier {
     if (opacityValue > 20) {
       windowManager.setOpacity(opacityValue / 100);
     }
-    jsonData["settings"][0]["opacity"] =
+    jsonSettings["settings"][0]["opacity"] =
         opacityValue / 100; //update JSON data with new opacity value
-    writeJsonToFile(
-      jsonData,
-    ); //write new JSON data to file so that it loads next time at startup
+    //write new JSON data to file so that it loads next time at startup
 
     notifyListeners();
   }
@@ -108,6 +128,7 @@ void showSettingsPopup(BuildContext context) {
           TextButton(
             child: Text("Close"),
             onPressed: () {
+              writeSettingsToFile(jsonSettings);
               Navigator.of(context).pop();
               restoreWindowPositionSize();
             },
