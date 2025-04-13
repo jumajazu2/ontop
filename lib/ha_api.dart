@@ -58,7 +58,45 @@ Future<List<dynamic>> fetchHomeAssistantStates(
       final data = json.decode(response.body);
       return [data["entity_id"] ?? '', data["state"] ?? ''];
     } else {
-      myHomePageKey.currentState?.dataError("Failed to fetch data: ${response.statusCode}");
+      myHomePageKey.currentState?.dataError(
+        "Failed to fetch data: ${response.statusCode}",
+      );
+      throw Exception('Failed to fetch data: ${response.statusCode}');
+    }
+  } on FormatException catch (e) {
+    myHomePageKey.currentState?.dataError("Response format error: $e");
+    throw Exception('Response format error: $e');
+  } on SocketException catch (e) {
+    myHomePageKey.currentState?.dataError("Network error: $e");
+    throw Exception('Network error: $e');
+  } catch (e) {
+    myHomePageKey.currentState?.dataError("Unexpected error: $e");
+    throw Exception('Unexpected error: $e');
+  }
+}
+
+Future<List<dynamic>> fetchHomeAssistantAll(
+  String baseUrl,
+  Map<String, String> headers,
+) async {
+  final String url = '$baseUrl/api/states';
+
+  try {
+    final response = await http.get(Uri.parse(url), headers: headers);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      var resultApiAll =
+          data
+              .map((item) => item["entity_id"])
+              .toList(); // Extract entity_id from each item
+      print(resultApiAll);
+      return resultApiAll;
+    } else {
+      myHomePageKey.currentState?.dataError(
+        "Failed to fetch data: ${response.statusCode}",
+      );
       throw Exception('Failed to fetch data: ${response.statusCode}');
     }
   } on FormatException catch (e) {

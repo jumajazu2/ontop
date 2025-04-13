@@ -14,7 +14,7 @@ class GenerateTable extends StatelessWidget {
   Widget build(BuildContext context) {
     // Helper function to chunk a list into sublists of a specific size (e.g., 5 columns per row)
     print("at the entry to GenerateTable: $listResults");
-    print(listResults[0].length);
+    // print(listResults[0].length);
     List<List> chunkList(List list, int chunkSize) {
       List<List> chunks = [];
       for (int i = 0; i < list.length; i += chunkSize) {

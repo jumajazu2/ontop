@@ -1,1 +1,12 @@
-{"settings":[{"bg_color":"red","text_color":"white","text_size":16,"opacity":0.744927536231884,"ontop":"true","items_row":3}]}
+{
+  "settings": [
+    {
+      "bg_color": "red",
+      "text_color": "white",
+      "text_size": 16,
+      "opacity": 0.9351032448377569,
+      "ontop": "true",
+      "items_row": 3
+    }
+  ]
+}

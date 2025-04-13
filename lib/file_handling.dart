@@ -76,17 +76,34 @@ loadSettingsFromFile() async //loads JSON from config.json file to the global va
 
 Future<void> writeSettingsToFile(Map<String, dynamic> newJsonData) async {
   try {
-    // Get the writable config file
+    // Get the writable settings file
     final file = File(getFilePath('settings.json'));
 
-    // Encode the JSON and write it to the file
-    final jsonString = jsonEncode(newJsonData);
+    // Encode the JSON with indentation for readability
+    final jsonString = const JsonEncoder.withIndent('  ').convert(newJsonData);
+    await file.writeAsString(jsonString);
+
+    myHomePageKey.currentState?.dataError("Settings saved successfully");
+    print("Settings JSON written successfully:\n$jsonString");
+  } catch (e) {
+    myHomePageKey.currentState?.dataError("Settings save failed");
+    print("Error writing Settings JSON: $e");
+  }
+}
+
+Future<void> writeConfigToFile(Map<String, dynamic> newJsonData) async {
+  try {
+    // Get the writable config file
+    final file = File(getFilePath('config.json'));
+
+    // Encode the JSON with indentation for readability
+    final jsonString = const JsonEncoder.withIndent('  ').convert(newJsonData);
     await file.writeAsString(jsonString);
 
     myHomePageKey.currentState?.dataError("Config saved successfully");
-    print("JSON written successfully: $jsonString");
+    print("Config JSON written successfully:\n$jsonString");
   } catch (e) {
     myHomePageKey.currentState?.dataError("Config save failed");
-    print("Error writing JSON: $e");
+    print("Error writing Config JSON: $e");
   }
 }

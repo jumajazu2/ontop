@@ -3,39 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'package:ontop/ha_api.dart';
 import 'package:ontop/main.dart';
 import 'dart:io';
-//import 'package:flutter/widgets.dart';
 
-//manually defined JSON of entities to show, as nested list, format:, add possibility to format(line break, color, alarm-flashing/red
-//HA_entity
-//type - value, swtich, indicator
-//name - plain lannguage text description
-//icon - https://api.flutter.dev/flutter/material/Icons-class.html OR noicon
-//icon_color - icon color or default
-//unit - as string
 //
-/*
-String jsonEntities = '''
-  {
-    "entities": [
-      {"entityHA": "sensor.axking_get_status_ac_output_active_power", "type": "value", "name": "Load", "icon":"bolt", "icon_color":"red", "unit": "W"},
-      {"entityHA": "sensor.axking_get_status_pv_input_power", "type": "value", "name": "PV", "icon":"solar_power", "icon_color":"yellow", "unit": "W"},
-      {"entityHA": "sensor.axking_get_status_battery_voltage", "type": "value", "name": "Batt", "icon":"battery_3_bar", "icon_color":"blue", "unit": "V"},
-      {"entityHA": "sensor.battery_current", "type": "value", "name": "Current", "icon":"battery_charging_full", "icon_color":"blue", "unit": "A"},
-      {"entityHA": "sensor.shellygas_3c6105f65548_gas_concentration", "type": "value", "name": "Gas", "icon":"report_problem_outlined", "icon_color":"orange", "unit": "ppm"},
-      {"entityHA": "sensor.esphome_web_499a10_sht40_temperature", "type": "value", "name": "DHW", "icon":"device_thermostat", "icon_color":"red", "unit": "C"},
-      {"entityHA": "sensor.axking_get_status_inverter_charge_status", "type": "value", "name": "SCC", "icon":"solar_power_outlined", "icon_color":"white", "unit": ""},
-      {"entityHA": "switch.tapo_plug_2", "type": "switch", "name": "Extractor", "icon":"fan", "icon_color":"orange", "unit": ""}
-    ],
-    "settings": [{"bg_color": "default", "text_color": "white", "text_size": "16"}],
-    "API": [{"baseURL": "http://192.168.1.28:8123",
-    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiMjY5NzU1ZTQyMDc0ZjAwOGYyMzdkZGJkZTAwMzcxNCIsImlhdCI6MTczMDg4NzMzNywiZXhwIjoyMDQ2MjQ3MzM3fQ.HhnvhyCZLG-HqtW8-KhoHrZkpmNq292hRjNli5D5qAY", 
-    "Content-Type": "application/json"}]
-  }
-  ''';
-*/
-//Map<String, dynamic> jsonData = jsonDecode(jsonEntities);
-
-List<dynamic>? listResults = [];
 
 Future createTextSpan(
   jsonData,
@@ -43,11 +12,14 @@ Future createTextSpan(
 {
   //listResults!.clear();
   listResults = [];
+  //resultsOut = [];
   var numberEntities = jsonData["entities"].length;
 
   print("Number of entities is $numberEntities");
   //print(jsonData["entities"]);
-  print("at the start of the for cycle: $listResults");
+  print(
+    "at the start of the for cycle: listResults = $listResults, resultsOut = $resultsOut",
+  );
   //print(jsonData["entities"][2]);
 
   for (var index = 0; index < numberEntities; index++) {
@@ -70,7 +42,7 @@ Future createTextSpan(
     String unit = jsonData["entities"][index]["unit"];
     String icon = jsonData["entities"][index]["icon"];
 
-    listResults?.add(
+    listResults.add(
       [
         name,
         icon,
@@ -90,7 +62,9 @@ Future createTextSpan(
   //displayValues = output;
   resultsOut = listResults;
   //print(displayValues);
-  print("at the end of the for cycle: $listResults");
+  print(
+    "at the end of the for cycle: listResults = $listResults, resultsOut = $resultsOut",
+  );
 
   if (numberEntities != resultsOut!.length) {
     myHomePageKey.currentState?.dataError(
@@ -103,7 +77,7 @@ Future createTextSpan(
     }
     int resultsOutLength = resultsOut!.length;
     print(
-      "default empty list created due to data length mismatch --- $listResults", //the variable is local, does not affect listResults
+      "default empty list created due to data length mismatch --- listResults = $listResults, resultsOut = $resultsOut", //the variable is local, does not affect listResults
     );
     print(resultsOutLength);
     print(numberEntities);
@@ -114,8 +88,8 @@ Future createTextSpan(
   return resultsOut;
 }
 
-void launch() {
-  createTextSpan(jsonData);
+Future? launch() async {
+  await createTextSpan(jsonData);
 }
 
 //List<dynamic> users = jsonData["users"];
