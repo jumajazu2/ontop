@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/foundation.dart';
 import 'package:ontop/main.dart';
+import 'package:ontop/logger.dart';
 
 String getExecutableDir() {
   return File(Platform.resolvedExecutable).parent.path;
@@ -105,5 +106,22 @@ Future<void> writeConfigToFile(Map<String, dynamic> newJsonData) async {
   } catch (e) {
     myHomePageKey.currentState?.dataError("Config save failed");
     print("Error writing Config JSON: $e");
+  }
+}
+
+Future<void> debugToFile(Map<String, dynamic> newJsonData) async {
+  try {
+    // Get the writable config file
+    final file = File(getFilePath('debug.json'));
+
+    // Encode the JSON with indentation for readability
+    final jsonString = const JsonEncoder.withIndent('  ').convert(newJsonData);
+    await file.writeAsString(jsonString);
+
+    myHomePageKey.currentState?.dataError("Debug Log saved successfully");
+    print("Debug Log written successfully:\n$jsonString");
+  } catch (e) {
+    myHomePageKey.currentState?.dataError("Debug Log save failed");
+    print("Error writing Debug Log: $e");
   }
 }

@@ -3,9 +3,10 @@ import 'package:flutter/widgets.dart';
 import 'package:ontop/ha_api.dart';
 import 'package:ontop/main.dart';
 import 'dart:io';
+import 'package:ontop/logger.dart';
 
 //
-
+int numberEntities = 0;
 Future createTextSpan(
   jsonData,
 ) async //create textspan with current values to be displayed
@@ -13,7 +14,9 @@ Future createTextSpan(
   //listResults!.clear();
   listResults = [];
   //resultsOut = [];
-  var numberEntities = jsonData["entities"].length;
+  numberEntities = jsonData["entities"].length;
+
+  listResults = List.filled(numberEntities, []);
 
   print("Number of entities is $numberEntities");
   //print(jsonData["entities"]);
@@ -42,15 +45,26 @@ Future createTextSpan(
     String unit = jsonData["entities"][index]["unit"];
     String icon = jsonData["entities"][index]["icon"];
 
-    listResults.add(
-      [
-        name,
-        icon,
-        readFromApi[1],
-        unit,
-        jsonData["entities"][index]["icon_color"],
-      ],
-    ); // each reported entity has a sublist with items in this order: name, icon, value, unit, type, (alert)
+    listResults[index] = [
+      name,
+      icon,
+      readFromApi[1],
+      unit,
+      jsonData["entities"][index]["icon_color"],
+    ];
+    print("value write at position $index: ${listResults[index]}");
+
+    //log the value written to the list
+    /*
+    listResults.add([
+      name,
+      icon,
+      readFromApi[1],
+      unit,
+      jsonData["entities"][index]["icon_color"],
+    ]);
+    */
+    // each reported entity has a sublist with items in this order: name, icon, value, unit, type, (alert)
 
     //spanResults.add(TextSpan())
     //spanResults.add(WidgetSpan(child: Icon(Icons.star, size: 18, color: Colors.amber);
@@ -60,11 +74,15 @@ Future createTextSpan(
   }
   //print(output);
   //displayValues = output;
+  print("------------------------------");
+  print("Entities requested: $numberEntities, received ${resultsOut.length}");
+
+ 
   resultsOut = listResults;
   //print(displayValues);
-  print(
-    "at the end of the for cycle: listResults = $listResults, resultsOut = $resultsOut",
-  );
+  // print(
+  //   "at the end of the for cycle: listResults = $listResults, resultsOut = $resultsOut",
+  // );
 
   if (numberEntities != resultsOut!.length) {
     myHomePageKey.currentState?.dataError(

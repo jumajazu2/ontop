@@ -58,17 +58,20 @@ class SettingsProvider extends ChangeNotifier {
 Size size = Size(100, 100);
 Offset position = Offset(400, 300);
 
-void getWindowInfo() async {
+Future getWindowInfo() async {
   size = await windowManager.getSize();
+  print("window size: $size");
   position = await windowManager.getPosition();
+  print("window position: $position");
 }
 
 void setSettingsWindowPositionSize() async {
   await windowManager.setPosition(Offset(300, 300));
-  await windowManager.setSize(Size(800, 600));
+  await windowManager.setSize(Size(1000, 1000));
 }
 
 void restoreWindowPositionSize() async {
+  print("window position for restore: $position");
   await windowManager.setPosition(position);
   await windowManager.setSize(size);
 }
@@ -215,8 +218,8 @@ class _SetupTabState extends State<SetupTab> {
 }
 
 // Function to show the settings popup with tabs
-void showSettingsPopup(BuildContext context) {
-  getWindowInfo();
+void showSettingsPopup(BuildContext context) async {
+  await getWindowInfo();
   setSettingsWindowPositionSize();
   print("for settings: jsonSettings: $jsonSettings");
   showDialog(
@@ -225,8 +228,8 @@ void showSettingsPopup(BuildContext context) {
       return AlertDialog(
         title: const Text("Settings & Setup"),
         content: SizedBox(
-          width: 500, // Set a fixed width for the dialog
-          height: 400, // Set a fixed height for the dialog
+          width: 900, // Set a fixed width for the dialog
+          height: 900, // Set a fixed height for the dialog
           child: DefaultTabController(
             length: 2, // Two tabs: Settings and Setup
             child: Column(
@@ -286,6 +289,7 @@ void showSettingsPopup(BuildContext context) {
             onPressed: () {
               writeSettingsToFile(jsonSettings);
               Navigator.of(context).pop();
+              print("window position on Close: $position");
               restoreWindowPositionSize();
             },
           ),

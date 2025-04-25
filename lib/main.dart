@@ -9,6 +9,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:ontop/file_handling.dart';
 import 'package:ontop/entities.dart';
 import 'package:ontop/settings.dart';
+import 'package:ontop/logger.dart';
 import 'package:provider/provider.dart';
 import 'package:collection/collection.dart';
 import 'dart:io';
@@ -126,7 +127,12 @@ class _MyHomePageState extends State<MyHomePage> {
     return DateTime.now().difference(lastBuildTime!).inSeconds;
   }
 
-  void dataError(String message) {
+  void dataError(String message) async {
+    LogManager logger = LogManager();
+
+    await logger.log(message + "  " + resultsOut.toString());
+    print("Error logged: $message, listResults = $listResults");
+
     final now = DateTime.now();
 
     // Optional: check how much time passed since last SnackBar
@@ -239,8 +245,8 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: SizedBox(
-        width: 25,
-        height: 25,
+        width: 15,
+        height: 15,
         child: FloatingActionButton(
           onPressed: () {
             showSettingsPopup(context);
