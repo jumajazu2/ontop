@@ -37,6 +37,7 @@ dependencies:
   collection:
   path_provider:
   shared_preferences:
+  screen_retriever: ^0.2.0
  
 
 

@@ -5,6 +5,7 @@ import 'package:ontop/main.dart';
 import 'package:ontop/file_handling.dart';
 import 'package:ontop/ha_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:screen_retriever/screen_retriever.dart';
 
 Future<void> savePreference(String key, String value) async {
   final prefs = await SharedPreferences.getInstance();
@@ -66,14 +67,67 @@ Future getWindowInfo() async {
 }
 
 void setSettingsWindowPositionSize() async {
-  await windowManager.setPosition(Offset(300, 300));
-  await windowManager.setSize(Size(1000, 1000));
+  await windowManager.maximize();
+  //await windowManager.setPosition(Offset(300, 300));
+  //await windowManager.setSize(Size(1000, 1000));
 }
 
 void restoreWindowPositionSize() async {
   print("window position for restore: $position");
+
+  await windowManager.unmaximize();
+  /*
+  final screens = await screenRetriever.getAllDisplays();
+  final primaryScreen = await screenRetriever.getPrimaryDisplay();
+
+  // Default to the primary screen if no screens are found
+  Rect screenBounds = Rect.fromLTWH(
+    primaryScreen.visiblePosition?.dx ?? 0.0,
+    primaryScreen.visiblePosition?.dy ?? 0.0,
+    primaryScreen.visibleSize?.width ?? 0.0,
+    primaryScreen.visibleSize?.height ?? 0.0,
+  );
+  print(
+    "window: $screens, primary: $primaryScreen, screenBounds: $screenBounds",
+  );
+  // Check if the position is within any screen's bounds
+  for (var screen in screens) {
+    final screenRect = Rect.fromLTWH(
+      screen.visiblePosition?.dx ?? 0.0,
+      screen.visiblePosition?.dy ?? 0.0,
+      screen.visibleSize?.width ?? 0.0,
+      screen.visibleSize?.height ?? 0.0,
+    );
+
+    if (screenRect.contains(position)) {
+      screenBounds = screenRect;
+      break;
+    }
+  }
+  print("window screenBounds: $screenBounds");
+  // Adjust the position if it's outside the screen bounds
+  double adjustedX = position.dx;
+  double adjustedY = position.dy;
+
+  if (position.dx < screenBounds.left) {
+    adjustedX = screenBounds.left;
+  } else if (position.dx > screenBounds.right - size.width) {
+    adjustedX = screenBounds.right - size.width;
+  }
+
+  if (position.dy < screenBounds.top) {
+    adjustedY = screenBounds.top;
+  } else if (position.dy > screenBounds.bottom - size.height) {
+    adjustedY = screenBounds.bottom - size.height;
+  }
+
+  final adjustedPosition = Offset(adjustedX, adjustedY);
+*/
+  // Restore the window position and size
   await windowManager.setPosition(position);
   await windowManager.setSize(size);
+
+  print("Restored window position: $position, size: $size");
 }
 
 class SetupTab extends StatefulWidget {

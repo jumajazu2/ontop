@@ -1,6 +1,7 @@
 //import 'dart:nativewrappers/_internal/vm/lib/math_patch.dart';
 
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:ontop/generate_table.dart';
@@ -23,7 +24,7 @@ List<dynamic> listResults = [
   [" ", " ", " ", " ", " "],
   [" ", " ", " ", " ", " "],
 ];
-
+Offset newPositionFinal = Offset.zero;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -109,11 +110,11 @@ Map<String, dynamic> jsonData = {};
 Map<String, dynamic> jsonSettings = {};
 
 class _MyHomePageState extends State<MyHomePage> {
-  //int _counter = 0;
-
   Offset _initialWindowOffset =
       Offset.zero; // Cache the initial window position
   Offset _dragStartOffset = Offset.zero; // Cache the drag start position
+  Timer? _dragUpdateTimer; // Timer to throttle position updates
+  bool _isDragging = false; // Track if the window is being dragged
 
   List? fromAPI = [" ", " ", " ", " ", " "];
   DateTime? lastBuildTime; // Store the last build time
@@ -130,7 +131,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void dataError(String message) async {
     LogManager logger = LogManager();
 
-    await logger.log(message + "  " + resultsOut.toString());
+    await logger.log("$message  ${resultsOut.toString()}");
     print("Error logged: $message, listResults = $listResults");
 
     final now = DateTime.now();
@@ -219,18 +220,49 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: null, // No app bar to match frameless window
       backgroundColor: const Color.fromARGB(255, 148, 167, 176),
       body: GestureDetector(
+        behavior:
+            HitTestBehavior.opaque, // Ensure GestureDetector captures events
         onPanStart: (details) async {
-          // Cache the initial window position when the drag starts
-          _initialWindowOffset = await windowManager.getPosition();
-          _dragStartOffset = details.globalPosition;
+          try {
+            // Cache the initial window position and drag start position
+            _initialWindowOffset = await windowManager.getPosition();
+            _dragStartOffset = details.globalPosition;
+            _isDragging = true; // Start dragging
+            print(
+              "Window pan start detected at $_initialWindowOffset, $_dragStartOffset",
+            );
+          } catch (e) {
+            print("Error in onPanStart: $e");
+          }
         },
         onPanUpdate: (details) async {
+          if (!_isDragging) return;
+
           // Calculate the new position based on the drag delta
           final Offset dragDelta = details.globalPosition - _dragStartOffset;
           final Offset newPosition = _initialWindowOffset + dragDelta;
 
           // Update the window position
-          await windowManager.setPosition(newPosition);
+          if (dragDelta.distance > 10) {
+            _dragUpdateTimer?.cancel(); // Cancel any existing timer
+            _dragUpdateTimer = Timer(
+              const Duration(milliseconds: 100),
+              () async {
+                print("window - dragDetla.distance = $dragDelta.distance");
+                // windowManager.setPosition(newPosition);
+                newPositionFinal = newPosition; // Update the final position
+
+                print("Window position updated to $newPositionFinal}");
+              },
+            );
+          }
+          //await windowManager.setPosition(newPosition);
+        },
+        onPanEnd: (details) {
+          // Stop dragging when the gesture ends
+          _isDragging = false;
+          print("Window pan ended");
+          windowManager.setPosition(newPositionFinal);
         },
         child: Center(
           child: Column(
