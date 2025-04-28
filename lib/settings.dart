@@ -6,6 +6,8 @@ import 'package:ontop/file_handling.dart';
 import 'package:ontop/ha_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:screen_retriever/screen_retriever.dart';
+import 'package:ontop/entities_editor.dart'; // Adjust the path as needed
+// Import the EntityEditor widget
 
 Future<void> savePreference(String key, String value) async {
   final prefs = await SharedPreferences.getInstance();
@@ -136,87 +138,6 @@ class SetupTab extends StatefulWidget {
 }
 
 class _SetupTabState extends State<SetupTab> {
-  List<String> allEntities = []; // List of all entities fetched from the API
-  List<String> filteredEntities = []; // Filtered list based on search
-  List<String> selectedEntities = []; // List of selected entities
-  TextEditingController searchController = TextEditingController();
-  TextEditingController baseUrlController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    baseUrlController.text =
-        jsonData["API"][0]["baseURL"] ?? ''; // Initialize Base URL
-    fetchEntities(); // Fetch entities when the widget is initialized
-  }
-
-  Future<void> fetchEntities() async {
-    try {
-      final baseUrl = jsonData["API"][0]["baseURL"];
-      var authorization = jsonData["API"][0]["Authorization"];
-      var contentType = jsonData["API"][0]["Content-Type"];
-      var headers = {
-        "Authorization": "$authorization",
-        "Content-Type": "$contentType",
-      };
-
-      final entities = await fetchHomeAssistantAll(baseUrl, headers);
-      setState(() {
-        allEntities = entities.cast<String>();
-        filteredEntities = allEntities; // Initially, show all entities
-      });
-    } catch (e) {
-      print("Error fetching entities: $e");
-    }
-  }
-
-  void filterEntities(String query) {
-    setState(() {
-      filteredEntities =
-          allEntities
-              .where(
-                (entity) => entity.toLowerCase().contains(query.toLowerCase()),
-              )
-              .toList();
-    });
-  }
-
-  void toggleEntitySelection(String entity) {
-    setState(() {
-      if (selectedEntities.contains(entity)) {
-        selectedEntities.remove(entity);
-      } else {
-        selectedEntities.add(entity);
-      }
-    });
-  }
-
-  void addSelectedEntities() {
-    for (var entity in selectedEntities) {
-      jsonData["entities"].add({
-        "entityHA": entity,
-        "type": "value",
-        "name":
-            entity
-                .split('.')
-                .last, // Use the last part of the entity ID as the name
-        "icon": "info", // Default icon
-        "icon_color": "blue", // Default color
-        "unit": "", // Default unit
-      });
-    }
-    writeConfigToFile(jsonData); // Save updated entities to the config file
-    print("Selected entities added: $selectedEntities");
-  }
-
-  void updateBaseUrl(String url) {
-    setState(() {
-      jsonData["API"][0]["baseURL"] = url; // Update the base URL in jsonData
-    });
-    writeConfigToFile(jsonData); // Save the updated base URL to the config file
-    print("Base URL updated: $url");
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -224,47 +145,9 @@ class _SetupTabState extends State<SetupTab> {
       children: [
         const Text("Setup", style: TextStyle(fontWeight: FontWeight.bold)),
         const SizedBox(height: 10),
-        // Base URL TextField
-        TextField(
-          controller: baseUrlController,
-          decoration: const InputDecoration(
-            labelText: "Base URL",
-            border: OutlineInputBorder(),
-          ),
-          onChanged: updateBaseUrl,
-        ),
-        const SizedBox(height: 10),
-        // Search Entities TextField
-        TextField(
-          controller: searchController,
-          decoration: const InputDecoration(
-            labelText: "Search Entities",
-            border: OutlineInputBorder(),
-          ),
-          onChanged: filterEntities,
-        ),
-        const SizedBox(height: 10),
-        // Entities List with Checkboxes
+        // Add the EntityEditor widget here
         Expanded(
-          child: ListView.builder(
-            itemCount: filteredEntities.length,
-            itemBuilder: (context, index) {
-              final entity = filteredEntities[index];
-              return CheckboxListTile(
-                title: Text(entity),
-                value: selectedEntities.contains(entity),
-                onChanged: (bool? value) {
-                  toggleEntitySelection(entity);
-                },
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 10),
-        // Add Selected Entities Button
-        ElevatedButton(
-          onPressed: addSelectedEntities,
-          child: const Text("Add Selected Entities"),
+          child: EntityEditor(), // Reference to the EntityEditor widget
         ),
       ],
     );

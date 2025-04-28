@@ -48,7 +48,7 @@ Future createTextSpan(
     listResults[index] = [
       name,
       icon,
-      readFromApi[1],
+      readFromApi[1], //.toStringAsFixed(x)
       unit,
       jsonData["entities"][index]["icon_color"],
     ];
@@ -77,7 +77,6 @@ Future createTextSpan(
   print("------------------------------");
   print("Entities requested: $numberEntities, received ${resultsOut.length}");
 
- 
   resultsOut = listResults;
   //print(displayValues);
   // print(

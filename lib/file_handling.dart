@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:flutter/foundation.dart';
@@ -84,7 +85,10 @@ Future<void> writeSettingsToFile(Map<String, dynamic> newJsonData) async {
     final jsonString = const JsonEncoder.withIndent('  ').convert(newJsonData);
     await file.writeAsString(jsonString);
 
-    myHomePageKey.currentState?.dataError("Settings saved successfully");
+    myHomePageKey.currentState?.dataError(
+      "Settings saved successfully",
+      color: Colors.green,
+    );
     print("Settings JSON written successfully:\n$jsonString");
   } catch (e) {
     myHomePageKey.currentState?.dataError("Settings save failed");

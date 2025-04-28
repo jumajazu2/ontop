@@ -128,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return DateTime.now().difference(lastBuildTime!).inSeconds;
   }
 
-  void dataError(String message) async {
+  void dataError(String message, {Color color = Colors.red}) async {
     LogManager logger = LogManager();
 
     await logger.log("$message  ${resultsOut.toString()}");
@@ -149,7 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: color,
         duration: Duration(milliseconds: 3000),
       ),
     );
