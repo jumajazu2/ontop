@@ -172,8 +172,8 @@ class _MyHomePageState extends State<MyHomePage> {
         const Duration(milliseconds: 500),
       ); // ⏳ Wait for 0.5 second
 
-      listResults!.clear; // Clear the list before adding new data
-      resultsOut!.clear;
+      listResults.clear; // Clear the list before adding new data
+      resultsOut.clear;
       launch();
 
       var sinceLastBuild = secondsSinceLastBuild();

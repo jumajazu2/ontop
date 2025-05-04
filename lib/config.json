@@ -2,6 +2,7 @@
   "entities": [
     {
       "entityHA": "sensor.axking_get_status_ac_output_active_power",
+      "attribute": "",
       "type": "value",
       "name": "Load",
       "icon": "bolt",
@@ -10,6 +11,7 @@
     },
     {
       "entityHA": "sensor.axking_get_status_pv_input_power",
+      "attribute": "",
       "type": "value",
       "name": "PV",
       "icon": "solar_power",
@@ -18,6 +20,7 @@
     },
     {
       "entityHA": "sensor.axking_get_status_battery_voltage",
+      "attribute": "",
       "type": "value",
       "name": "Batt",
       "icon": "battery_3_bar",
@@ -26,6 +29,7 @@
     },
     {
       "entityHA": "sensor.battery_current",
+      "attribute": "",
       "type": "value",
       "name": "Current",
       "icon": "battery_charging_full",
@@ -34,14 +38,16 @@
     },
     {
       "entityHA": "sensor.shellygas_3c6105f65548_gas_concentration",
+      "attribute": "",
       "type": "value",
       "name": "Gas",
       "icon": "report_problem_outlined",
-      "icon_color": "orange",
+      "icon_color": "red",
       "unit": "ppm"
     },
     {
       "entityHA": "sensor.esphome_web_499a10_sht40_temperature",
+      "attribute": "",
       "type": "value",
       "name": "DHW",
       "icon": "device_thermostat",
@@ -50,6 +56,7 @@
     },
     {
       "entityHA": "sensor.axking_get_status_inverter_charge_status",
+      "attribute": "",
       "type": "value",
       "name": "SCC",
       "icon": "solar_power_outlined",
@@ -58,6 +65,7 @@
     },
     {
       "entityHA": "switch.tapo_plug_2",
+      "attribute": "",
       "type": "switch",
       "name": "Extractor",
       "icon": "fan",
@@ -66,11 +74,21 @@
     },
     {
       "entityHA": "sensor.tapo_plug_18_current_power",
+      "attribute": "",
       "type": "value",
       "name": "DHW Power",
       "icon": "flash_on",
       "icon_color": "orange",
       "unit": "W"
+    },
+    {
+      "entityHA": "fan.esphome_web_4f3eb4_pwm_ouput_2",
+      "attribute": "percentage",
+      "type": "value",
+      "name": "DHW percentage",
+      "icon": "speed",
+      "icon_color": "blue",
+      "unit": "%"
     }
   ],
   "API": [

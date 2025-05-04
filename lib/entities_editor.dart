@@ -12,10 +12,14 @@ class EntityEditor extends StatefulWidget {
 }
 
 class _EntityEditorState extends State<EntityEditor> {
-  List<Map<String, dynamic>> entities = []; // Temporary storage for entities
+  List<Map<String, dynamic>> tempEntities =
+      []; // Temporary storage for entities
   List<String> allEntities = []; // List of all available entities for dropdown
   List<String> filteredEntities = []; // Filtered list for dropdown search
+  Map<String, List<String>> entityAttributes = {}; // Map of entity attributes
   TextEditingController searchController = TextEditingController();
+  List<String> attributesEntity =
+      []; // List of attributes for each entity, with its index corresponding to JSON entities
 
   @override
   void initState() {
@@ -27,7 +31,7 @@ class _EntityEditorState extends State<EntityEditor> {
   Future<void> loadEntitiesFromConfig() async {
     // Load entities from config.json into the temporary variable
     setState(() {
-      entities = List<Map<String, dynamic>>.from(jsonData["entities"]);
+      tempEntities = List<Map<String, dynamic>>.from(jsonData["entities"]);
     });
   }
 
@@ -42,12 +46,36 @@ class _EntityEditorState extends State<EntityEditor> {
       };
 
       final fetchedEntities = await fetchHomeAssistantAll(baseUrl, headers);
+      print("fetchedEntities: $fetchedEntities");
       setState(() {
         allEntities = fetchedEntities.cast<String>();
         filteredEntities = allEntities; // Initially show all entities
       });
     } catch (e) {
       print("Error fetching available entities: $e");
+    }
+  }
+
+  Future<void> fetchAttributesForEntity(String entityHA) async {
+    print("Base URL: $baseUrl, EntityHA: $entityHA, Headers: $headers");
+
+    try {
+      // Simulate fetching attributes for the selected entity
+      print("trying to fetch attributes for $entityHA");
+      var _attributes = await fetchHomeAssistantStates(
+        entityHA,
+        baseUrl,
+        headers,
+      );
+
+      var attributes = _attributes[2].keys.toList();
+      print("AttributesXXX for $entityHA: $attributes");
+      setState(() {
+        entityAttributes[entityHA] = attributes.cast<String>();
+        print("entity attibutes for $entityHA: $attributes");
+      });
+    } catch (e) {
+      print("Error fetching attributes for $entityHA: $e");
     }
   }
 
@@ -64,9 +92,24 @@ class _EntityEditorState extends State<EntityEditor> {
 
   void addNewEntity() {
     setState(() {
-      entities.add({
+      tempEntities.add({
         "entityHA": "",
-        "type": "value",
+        "attribute": "",
+        "type": "",
+        "name": "",
+        "icon": "",
+        "icon_color": "",
+        "unit": "",
+      });
+    });
+  }
+
+  void addNewEntityAt(int position) {
+    setState(() {
+      tempEntities.insert(position, {
+        "entityHA": "",
+        "attribute": "",
+        "type": "",
         "name": "",
         "icon": "",
         "icon_color": "",
@@ -76,21 +119,66 @@ class _EntityEditorState extends State<EntityEditor> {
   }
 
   void saveEntitiesToFile() async {
-    // Save the updated entities to config.json
-    jsonData["entities"] = entities;
-    await writeConfigToFile(jsonData);
-    print("Entities saved to config.json");
+    // Show confirmation dialog
+    final shouldSave = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm Save"),
+          content: const Text(
+            "Do you really want to save changes to the configuration?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // User cancels
+              },
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // User confirms
+              },
+              child: const Text("Save"),
+            ),
+          ],
+        );
+      },
+    );
+
+    // If the user confirms, proceed with saving
+    if (shouldSave == true) {
+      jsonData["entities"] = tempEntities;
+      await writeConfigToFile(jsonData);
+      print("Entities saved to config.json");
+
+      // Optional: Show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Configuration saved successfully!")),
+      );
+    }
+
+    if (shouldSave == false) {
+      // Optional: Show a cancellation message
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Save cancelled.")));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Entity Editor"),
+        title: const Text("Entity/Attribute Editor"),
+        leading: SizedBox.shrink(),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: saveEntitiesToFile, // Save entities to file
+          Tooltip(
+            message: "Click to Save Entities", // Text to display as the tooltip
+            child: IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: saveEntitiesToFile, // Save entities to file
+            ),
           ),
         ],
       ),
@@ -98,9 +186,26 @@ class _EntityEditorState extends State<EntityEditor> {
         children: [
           Expanded(
             child: ListView.builder(
-              itemCount: entities.length,
+              itemCount: tempEntities.length,
               itemBuilder: (context, index) {
-                final entity = entities[index];
+                final entity = tempEntities[index];
+                final attributes =
+                    entityAttributes[entity["entityHA"]] ??
+                    []; //available attributes for the selected entity
+                final setattribute = entity["attribute"] ?? "";
+                if (!attributes.contains(setattribute)) {
+                  attributes.add(
+                    setattribute,
+                  ); //set the first attribute as default
+                }
+
+                //currenty selected attribute to show instead of the state for the entity
+                //attributes.add(
+                //  setattribute,
+                //); //add the selected attribute to the list of attributes for the dropdown
+                print(
+                  "attributesZZZ: $attributes, setattr $setattribute entity: $entity",
+                );
                 return Card(
                   margin: const EdgeInsets.symmetric(
                     vertical: 4,
@@ -145,9 +250,13 @@ class _EntityEditorState extends State<EntityEditor> {
                                         }).toList(),
                                     onChanged: (value) {
                                       setState(() {
-                                        entities[index]["entityHA"] =
+                                        tempEntities[index]["entityHA"] =
                                             value ?? "";
+                                        tempEntities[index]["attribute"] =
+                                            ""; // Reset attribute
                                       });
+
+                                      fetchAttributesForEntity(value!);
                                     },
                                     decoration: const InputDecoration(
                                       labelText: "Select Entity",
@@ -160,13 +269,47 @@ class _EntityEditorState extends State<EntityEditor> {
                           ],
                         ),
                         const SizedBox(height: 10),
+                        // Dropdown for Attributes
+                        DropdownButtonFormField<String>(
+                          value:
+                              /*   attributes.contains(
+                                    setattribute,
+                                  ) //display set from JSON
+                                  ? setattribute
+                                  : null, // Ensure the value is in the list or set to null*/
+                              setattribute,
+                          items:
+                              attributes.map((attribute) {
+                                return DropdownMenuItem<String>(
+                                  value: attribute,
+                                  child: Text(attribute),
+                                );
+                              }).toList(),
+                          onChanged: (value) {
+                            //fetchAttributesForEntity(value!); does not work as value does not hold the correct entity
+                            if (value != setattribute) {
+                              setState(() {
+                                tempEntities[index]["attribute"] = value;
+                              });
+                            }
+                          },
+                          decoration: const InputDecoration(
+                            labelText:
+                                "Selected Attribute, to show all available attributes, re-select the entity above",
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                         // Editable fields for other properties
                         TextFormField(
                           initialValue: entity["name"],
-                          decoration: const InputDecoration(labelText: "Name"),
+                          decoration: const InputDecoration(
+                            labelText: "Name",
+                            border: OutlineInputBorder(),
+                          ),
                           onChanged: (value) {
                             setState(() {
-                              entities[index]["name"] = value;
+                              tempEntities[index]["name"] = value;
                             });
                           },
                         ),
@@ -190,7 +333,7 @@ class _EntityEditorState extends State<EntityEditor> {
                               }).toList(),
                           onChanged: (value) {
                             setState(() {
-                              entities[index]["icon"] = value ?? "";
+                              tempEntities[index]["icon"] = value ?? "";
                             });
                           },
                           decoration: const InputDecoration(
@@ -224,7 +367,7 @@ class _EntityEditorState extends State<EntityEditor> {
                               }).toList(),
                           onChanged: (value) {
                             setState(() {
-                              entities[index]["icon_color"] = value ?? "";
+                              tempEntities[index]["icon_color"] = value ?? "";
                             });
                           },
                           decoration: const InputDecoration(
@@ -235,24 +378,85 @@ class _EntityEditorState extends State<EntityEditor> {
                         const SizedBox(height: 10),
                         TextFormField(
                           initialValue: entity["unit"],
-                          decoration: const InputDecoration(labelText: "Unit"),
+                          decoration: const InputDecoration(
+                            labelText: "Unit",
+                            border: OutlineInputBorder(),
+                          ),
                           onChanged: (value) {
                             setState(() {
-                              entities[index]["unit"] = value;
+                              tempEntities[index]["unit"] = value;
                             });
                           },
                         ),
                         const SizedBox(height: 10),
+
                         // Delete button
                         Align(
                           alignment: Alignment.centerRight,
-                          child: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () {
-                              setState(() {
-                                entities.removeAt(index);
-                              });
-                            },
+
+                          child: Tooltip(
+                            message: "Delete this entity",
+                            child: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+
+                              onPressed: () async {
+                                final confirmDelete = await showDialog<bool>(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text("Confirm Deletion"),
+                                      content: const Text(
+                                        "Are you sure you want to delete this entity?",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(
+                                              context,
+                                            ).pop(false); // User cancels
+                                          },
+                                          child: const Text("Cancel"),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.of(
+                                              context,
+                                            ).pop(true); // User confirms
+                                          },
+                                          child: const Text("Delete"),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+
+                                if (confirmDelete == true) {
+                                  setState(() {
+                                    tempEntities.removeAt(
+                                      index,
+                                    ); // Remove the entity
+                                  });
+
+                                  // Optional: Show a success message
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        "Entity deleted successfully!",
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: ElevatedButton.icon(
+                            onPressed: () => addNewEntityAt(index + 1),
+                            icon: const Icon(Icons.add),
+                            label: const Text("Add New Entity Below"),
                           ),
                         ),
                       ],

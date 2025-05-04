@@ -45,13 +45,23 @@ Future createTextSpan(
     String unit = jsonData["entities"][index]["unit"];
     String icon = jsonData["entities"][index]["icon"];
 
-    listResults[index] = [
-      name,
-      icon,
-      readFromApi[1], //.toStringAsFixed(x)
-      unit,
-      jsonData["entities"][index]["icon_color"],
-    ];
+    if (jsonData["entities"][index]["attribute"] == "") {
+      listResults[index] = [
+        name,
+        icon,
+        readFromApi[1], //.toStringAsFixed(x)
+        unit,
+        jsonData["entities"][index]["icon_color"],
+      ];
+    } else {
+      listResults[index] = [
+        name,
+        icon,
+        readFromApi[2][jsonData["entities"][index]["attribute"]] ?? "",
+        unit,
+        jsonData["entities"][index]["icon_color"],
+      ];
+    }
     print("value write at position $index: ${listResults[index]}");
 
     //log the value written to the list

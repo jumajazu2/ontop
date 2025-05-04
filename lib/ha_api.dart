@@ -5,7 +5,7 @@ import 'package:ontop/main.dart';
 
 final String url = "http://homeassistant.local:8123/api/states/";
 
-final String baseUrl = "192.168.1.28:8123";
+final String baseUrl = jsonData["API"][0]["baseURL"] ?? url;
 
 final Map<String, String> headers = {
   "Authorization":
@@ -56,7 +56,12 @@ Future<List<dynamic>> fetchHomeAssistantStates(
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return [data["entity_id"] ?? '', data["state"] ?? ''];
+      print(data);
+      return [
+        data["entity_id"] ?? '',
+        data["state"] ?? '',
+        data["attributes"] ?? '',
+      ];
     } else {
       myHomePageKey.currentState?.dataError(
         "Failed to fetch data: ${response.statusCode}",
@@ -91,8 +96,39 @@ Future<List<dynamic>> fetchHomeAssistantAll(
           data
               .map((item) => item["entity_id"])
               .toList(); // Extract entity_id from each item
-      print(resultApiAll);
+      print("resultApiAll: $resultApiAll");
       return resultApiAll;
+    } else {
+      myHomePageKey.currentState?.dataError(
+        "Failed to fetch data: ${response.statusCode}",
+      );
+      throw Exception('Failed to fetch data: ${response.statusCode}');
+    }
+  } on FormatException catch (e) {
+    myHomePageKey.currentState?.dataError("Response format error: $e");
+    throw Exception('Response format error: $e');
+  } on SocketException catch (e) {
+    myHomePageKey.currentState?.dataError("Network error: $e");
+    throw Exception('Network error: $e');
+  } catch (e) {
+    myHomePageKey.currentState?.dataError("Unexpected error: $e");
+    throw Exception('Unexpected error: $e');
+  }
+}
+
+Future<List<dynamic>> fetchAttributes(
+  String entityId,
+  String baseUrl,
+  Map<String, String> headers,
+) async {
+  final String url = '$baseUrl/api/states/$entityId';
+
+  try {
+    final response = await http.get(Uri.parse(url), headers: headers);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data["attributes"] ?? [];
     } else {
       myHomePageKey.currentState?.dataError(
         "Failed to fetch data: ${response.statusCode}",

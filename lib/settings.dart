@@ -180,30 +180,89 @@ void showSettingsPopup(BuildContext context) async {
                         builder: (context, settings, child) {
                           return Column(
                             children: [
-                              Row(
-                                children: [
-                                  Checkbox(
-                                    value: settings.enableFeature,
-                                    onChanged: (bool? value) {
-                                      settings.toggleFeature(value!);
-                                    },
-                                  ),
-                                  const Text("Enable Feature"),
-                                ],
-                              ),
                               Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    "Transparency: ${settings.opacityValue.toInt()}",
-                                  ),
-                                  Slider(
-                                    min: 20,
-                                    max: 100,
-                                    value: settings.opacityValue,
-                                    onChanged: (value) {
-                                      settings.updateOpacityValue(value);
+                                  const SizedBox(height: 10),
+                                  // Editable fields for other properties
+                                  StatefulBuilder(
+                                    builder: (
+                                      BuildContext context,
+                                      StateSetter setState,
+                                    ) {
+                                      return Column(
+                                        children: [
+                                          TextFormField(
+                                            initialValue:
+                                                jsonData["API"][0]["baseURL"],
+                                            decoration: InputDecoration(
+                                              labelText:
+                                                  "Base API URL", // Label text
+                                              labelStyle: const TextStyle(
+                                                fontSize: 14,
+                                              ), // Optional: Adjust label font size
+                                              border:
+                                                  const OutlineInputBorder(), // Rectangle border
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 8,
+                                                  ), // Adjust padding inside the box
+                                            ),
+                                            onChanged: (value) {
+                                              setState(() {
+                                                jsonData["API"][0]["baseURL"] =
+                                                    value;
+                                              });
+                                            },
+                                          ),
+                                          const SizedBox(height: 20),
+                                          // Editable fields for other properties
+                                          TextFormField(
+                                            initialValue:
+                                                jsonData["API"][0]["NabuCasaURL"],
+                                            decoration: InputDecoration(
+                                              labelText:
+                                                  "NabuCasa URL", // Label text
+                                              labelStyle: const TextStyle(
+                                                fontSize: 14,
+                                              ), // Optional: Adjust label font size
+                                              border:
+                                                  const OutlineInputBorder(), // Rectangle border
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 8,
+                                                  ), // Adjust padding inside the box
+                                            ),
+                                            onChanged: (value) {
+                                              setState(() {
+                                                jsonData["API"][0]["NabuCasaURL"] =
+                                                    value;
+                                              });
+                                            },
+                                          ),
+                                        ],
+                                      );
                                     },
+                                  ),
+
+                                  const SizedBox(height: 30),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Transparency: ${settings.opacityValue.toInt()}",
+                                      ),
+                                      Slider(
+                                        min: 20,
+                                        max: 100,
+                                        value: settings.opacityValue,
+                                        onChanged: (value) {
+                                          settings.updateOpacityValue(value);
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
