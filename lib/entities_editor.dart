@@ -6,6 +6,9 @@ import 'dart:convert'; // Import for JSON encoding/decoding
 import 'package:ontop/main.dart';
 import 'package:ontop/ha_api.dart';
 
+
+
+
 class EntityEditor extends StatefulWidget {
   @override
   _EntityEditorState createState() => _EntityEditorState();
@@ -31,7 +34,9 @@ class _EntityEditorState extends State<EntityEditor> {
   Future<void> loadEntitiesFromConfig() async {
     // Load entities from config.json into the temporary variable
     setState(() {
-      tempEntities = List<Map<String, dynamic>>.from(jsonData["entities"]);
+      tempEntities = List<Map<String, dynamic>>.from(
+        jsonDecode(jsonEncode(jsonData["entities"])),
+      );
     });
   }
 
@@ -96,10 +101,10 @@ class _EntityEditorState extends State<EntityEditor> {
         "entityHA": "",
         "attribute": "",
         "type": "",
-        "name": "",
+        "name": "Enter Name",
         "icon": "",
         "icon_color": "",
-        "unit": "",
+        "unit": "Enter Unit",
       });
     });
   }
@@ -110,15 +115,31 @@ class _EntityEditorState extends State<EntityEditor> {
         "entityHA": "",
         "attribute": "",
         "type": "",
-        "name": "",
+        "name": "Enter Name",
         "icon": "",
         "icon_color": "",
-        "unit": "",
+        "unit": "Enter Unit",
       });
     });
   }
 
   void saveEntitiesToFile() async {
+    for (int i = 0; i < tempEntities.length; i++) {
+      final entity = tempEntities[i];
+
+      // Check if the "entityHA" dropdown is empty
+      if (entity["entityHA"] == null || entity["entityHA"]!.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Entity ID cannot be empty for entity at position ${i + 1}.",
+            ),
+          ),
+        );
+        return; // Stop the save operation
+      }
+    }
+
     // Show confirmation dialog
     final shouldSave = await showDialog<bool>(
       context: context,
@@ -234,33 +255,43 @@ class _EntityEditorState extends State<EntityEditor> {
                                     },
                                   ),
                                   const SizedBox(height: 8),
-                                  DropdownButtonFormField<String>(
-                                    value:
-                                        filteredEntities.contains(
-                                              entity["entityHA"],
-                                            )
-                                            ? entity["entityHA"]
-                                            : null, // Ensure the value is in the list or set to null
-                                    items:
-                                        filteredEntities.map((entityHA) {
-                                          return DropdownMenuItem<String>(
-                                            value: entityHA,
-                                            child: Text(entityHA),
-                                          );
-                                        }).toList(),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        tempEntities[index]["entityHA"] =
-                                            value ?? "";
-                                        tempEntities[index]["attribute"] =
-                                            ""; // Reset attribute
-                                      });
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color:
+                                          (entity["entityHA"] == null ||
+                                                  entity["entityHA"]!.isEmpty)
+                                              ? Colors.red
+                                              : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: DropdownButtonFormField<String>(
+                                      value:
+                                          filteredEntities.contains(
+                                                entity["entityHA"],
+                                              )
+                                              ? entity["entityHA"]
+                                              : null,
+                                      items:
+                                          filteredEntities.map((entityHA) {
+                                            return DropdownMenuItem<String>(
+                                              value: entityHA,
+                                              child: Text(entityHA),
+                                            );
+                                          }).toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          tempEntities[index]["entityHA"] =
+                                              value ?? "";
+                                          tempEntities[index]["attribute"] =
+                                              ""; // Reset attribute
+                                        });
 
-                                      fetchAttributesForEntity(value!);
-                                    },
-                                    decoration: const InputDecoration(
-                                      labelText: "Select Entity",
-                                      border: OutlineInputBorder(),
+                                        fetchAttributesForEntity(value!);
+                                      },
+                                      decoration: const InputDecoration(
+                                        labelText: "Select Entity",
+                                        border: OutlineInputBorder(),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -366,9 +397,9 @@ class _EntityEditorState extends State<EntityEditor> {
                                 );
                               }).toList(),
                           onChanged: (value) {
-                            setState(() {
-                              tempEntities[index]["icon_color"] = value ?? "";
-                            });
+                            //setState(() {
+                            tempEntities[index]["icon_color"] = value ?? "";
+                            //});
                           },
                           decoration: const InputDecoration(
                             labelText: "Select Icon Color",

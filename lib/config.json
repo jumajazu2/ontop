@@ -87,7 +87,7 @@
       "type": "value",
       "name": "DHW percentage",
       "icon": "speed",
-      "icon_color": "blue",
+      "icon_color": "red",
       "unit": "%"
     }
   ],

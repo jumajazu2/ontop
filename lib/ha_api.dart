@@ -76,7 +76,11 @@ Future<List<dynamic>> fetchHomeAssistantStates(
     throw Exception('Network error: $e');
   } catch (e) {
     myHomePageKey.currentState?.dataError("Unexpected error: $e");
-    throw Exception('Unexpected error: $e');
+    return [
+      "Error",
+      "Error",
+      "Error",
+    ]; // Return a default value in case of an error
   }
 }
 

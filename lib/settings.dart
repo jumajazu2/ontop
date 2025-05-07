@@ -6,7 +6,10 @@ import 'package:ontop/file_handling.dart';
 import 'package:ontop/ha_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:screen_retriever/screen_retriever.dart';
-import 'package:ontop/entities_editor.dart'; // Adjust the path as needed
+import 'dart:convert';
+import 'package:ontop/icons.dart'; // Adjust the path as needed
+import 'package:ontop/entities_editor.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart'; // Adjust the path as needed
 // Import the EntityEditor widget
 
 Future<void> savePreference(String key, String value) async {
@@ -28,13 +31,15 @@ Future<void> removePreference(String key) async {
   print("Preference removed: $key");
 }
 
+List<Map<String, dynamic>> tempConfig = [];
+
 // Global state for settings (using Provider)
 class SettingsProvider extends ChangeNotifier {
   bool enableFeature = false;
   double opacityValue =
       jsonSettings["settings"][0]["opacity"] * 100 ?? 90.0; // Default value
   String setupUrl = jsonData["API"][0]["baseURL"] ?? '';
-
+  List<Map<String, dynamic>> tempConfig = [];
   void toggleFeature(bool value) {
     enableFeature = value;
     notifyListeners();
@@ -159,6 +164,7 @@ void showSettingsPopup(BuildContext context) async {
   await getWindowInfo();
   setSettingsWindowPositionSize();
   print("for settings: jsonSettings: $jsonSettings");
+
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -216,6 +222,9 @@ void showSettingsPopup(BuildContext context) async {
                                             },
                                           ),
                                           const SizedBox(height: 20),
+
+                                          // ConfigEditor(), // ConfigE
+                                          const SizedBox(height: 20),
                                           // Editable fields for other properties
                                           TextFormField(
                                             initialValue:
@@ -246,7 +255,8 @@ void showSettingsPopup(BuildContext context) async {
                                     },
                                   ),
 
-                                  const SizedBox(height: 30),
+                                  SizedBox(height: 200, child: ConfigEditor()),
+
                                   Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -267,9 +277,11 @@ void showSettingsPopup(BuildContext context) async {
                                 ],
                               ),
                             ],
+                            // Pass the tempConfig to ConfigEditor
                           );
                         },
                       ),
+
                       // Setup Tab
                       SetupTab(),
                     ],
@@ -293,4 +305,122 @@ void showSettingsPopup(BuildContext context) async {
       );
     },
   );
+}
+
+class ConfigEditor extends StatefulWidget {
+  @override
+  _ConfigEditorState createState() => _ConfigEditorState();
+}
+
+class _ConfigEditorState extends State<ConfigEditor> {
+  List<Map<String, dynamic>> tempconfig = []; // Temporary storage for entities
+
+  Future<void> loadConfig() async {
+    if (jsonSettings["settings"] != null &&
+        jsonSettings["settings"].isNotEmpty) {
+      tempConfig = List<Map<String, dynamic>>.from(
+        jsonDecode(jsonEncode(jsonSettings["settings"])),
+      );
+    } else {
+      tempConfig = [
+        {
+          "bg_color": Colors.red,
+          "text_color": Colors.white,
+          "text_size": 16.0,
+          "opacity": 1.0,
+          "ontop": true,
+          "items_row": 3,
+        },
+      ]; // Provide default values if settings are missing
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    //loadConfig(); //
+
+    tempConfig = [
+      {
+        "bg_color": Colors.red,
+        "text_color": Colors.white,
+        "text_size": 16.0,
+        "opacity": 1.0,
+        "ontop": true,
+        "items_row": 3,
+      },
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (tempConfig.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      ); // Show a loading indicator
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+
+      children: [
+        // Background Color Picker
+        Expanded(
+          child: ListTile(
+            title: const Text("Background Color"),
+
+            trailing: Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: iconColor["red"],
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.black),
+              ),
+            ),
+            onTap: () async {
+              Color? selectedColor = await showDialog<Color>(
+                context: context,
+                builder: (BuildContext context) {
+                  Color tempColor = tempConfig[0]["bg_color"] ?? Colors.red;
+                  return AlertDialog(
+                    title: const Text("Pick a Background Color"),
+                    content: SingleChildScrollView(
+                      child: ColorPicker(
+                        pickerColor: tempColor,
+                        onColorChanged: (color) {
+                          tempColor = color;
+                        },
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        child: const Text("Cancel"),
+                        onPressed: () {
+                          Navigator.of(context).pop(null);
+                        },
+                      ),
+                      TextButton(
+                        child: const Text("Select"),
+                        onPressed: () {
+                          Navigator.of(context).pop(tempColor);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (selectedColor != null) {
+                setState(() {
+                  tempConfig[0]["bg_color"] = selectedColor;
+                });
+              }
+            },
+          ),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
 }
