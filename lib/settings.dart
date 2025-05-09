@@ -160,7 +160,7 @@ class _SetupTabState extends State<SetupTab> {
 }
 
 // Function to show the settings popup with tabs
-void showSettingsPopup(BuildContext context) async {
+void showSettingsPopup(BuildContext context, VoidCallback onClose) async {
   await getWindowInfo();
   setSettingsWindowPositionSize();
   print("for settings: jsonSettings: $jsonSettings");
@@ -313,33 +313,42 @@ class ConfigEditor extends StatefulWidget {
 }
 
 class _ConfigEditorState extends State<ConfigEditor> {
-  List<Map<String, dynamic>> tempconfig = []; // Temporary storage for entities
+  List<dynamic> tempConfig = []; // Temporary storage for entities
 
-  Future<void> loadConfig() async {
+  List<dynamic> loadConfig() {
     if (jsonSettings["settings"] != null &&
         jsonSettings["settings"].isNotEmpty) {
-      tempConfig = List<Map<String, dynamic>>.from(
-        jsonDecode(jsonEncode(jsonSettings["settings"])),
-      );
+      tempConfig =
+          jsonSettings["settings"]; //List<Map<String, dynamic>>.from(jsonDecode(jsonEncode(jsonSettings["settings"])),
+      //);
+      return tempConfig;
     } else {
+      //settings missing
       tempConfig = [
         {
-          "bg_color": Colors.red,
-          "text_color": Colors.white,
-          "text_size": 16.0,
-          "opacity": 1.0,
-          "ontop": true,
-          "items_row": 3,
+          "settings": [
+            {
+              "bg_color": "00000000",
+              "text_color": "ffffff",
+              "text_size": 16,
+              "opacity": 1.0,
+              "ontop": "true",
+              "items_row": 3,
+            },
+          ],
         },
-      ]; // Provide default values if settings are missing
+      ];
+      return tempConfig; // Provide default values if settings are missing
     }
   }
 
   @override
   void initState() {
     super.initState();
-    //loadConfig(); //
+    //loadConfig();
+  } //
 
+  /*
     tempConfig = [
       {
         "bg_color": Colors.red,
@@ -351,15 +360,15 @@ class _ConfigEditorState extends State<ConfigEditor> {
       },
     ];
   }
-
+*/
+  double textSize = 16.0; // Default text size
   @override
   Widget build(BuildContext context) {
-    if (tempConfig.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      ); // Show a loading indicator
-    }
+    Color tempColor = Color(
+      int.parse(jsonSettings["settings"][0]["bg_color"], radix: 16),
+    );
 
+    print("tempColor - $tempColor");
     return ListView(
       padding: const EdgeInsets.all(16.0),
 
@@ -367,29 +376,72 @@ class _ConfigEditorState extends State<ConfigEditor> {
         // Background Color Picker
         Expanded(
           child: ListTile(
-            title: const Text("Background Color"),
+            title: Text("Background Color"),
 
-            trailing: Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: iconColor["red"],
-                shape: BoxShape.circle,
-                border: Border.all(color: Colors.black),
-              ),
+            trailing: Row(
+              mainAxisSize:
+                  MainAxisSize
+                      .min, // Ensures the Row takes up only the necessary space
+              children: [
+                // Color Circle
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: Color(
+                      int.parse(
+                        "FF${jsonSettings["settings"][0]["bg_color"]}", // Prepend "FF" for full opacity
+                        radix: 16,
+                      ),
+                    ),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.black),
+                  ),
+                ),
+                const SizedBox(
+                  width: 400,
+                ), // Add spacing between the circle and the button
+                // Restore Default Button
+                OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      jsonSettings["settings"][0]["bg_color"] =
+                          "ffd1cfcf"; // Default grey color
+                      writeSettingsToFile(
+                        jsonSettings,
+                      ); // Save the updated settings
+                    });
+                  },
+                  child: const Text("Restore Default (Grey)"),
+                ),
+              ],
             ),
+
+            // Text("Background Color"),
             onTap: () async {
               Color? selectedColor = await showDialog<Color>(
                 context: context,
                 builder: (BuildContext context) {
-                  Color tempColor = tempConfig[0]["bg_color"] ?? Colors.red;
+                  Color tempColor =
+                      Color(
+                        int.parse(
+                          jsonSettings["settings"][0]["bg_color"],
+                          radix: 16,
+                        ),
+                      ) ??
+                      Colors.red;
                   return AlertDialog(
                     title: const Text("Pick a Background Color"),
                     content: SingleChildScrollView(
                       child: ColorPicker(
                         pickerColor: tempColor,
                         onColorChanged: (color) {
-                          tempColor = color;
+                          setState(() {
+                            tempColor = color;
+                            jsonSettings["settings"][0]["bg_color"] = tempColor
+                                .toARGB32()
+                                .toRadixString(16);
+                          });
                         },
                       ),
                     ),
@@ -403,6 +455,7 @@ class _ConfigEditorState extends State<ConfigEditor> {
                       TextButton(
                         child: const Text("Select"),
                         onPressed: () {
+                          ;
                           Navigator.of(context).pop(tempColor);
                         },
                       ),
@@ -413,13 +466,164 @@ class _ConfigEditorState extends State<ConfigEditor> {
 
               if (selectedColor != null) {
                 setState(() {
-                  tempConfig[0]["bg_color"] = selectedColor;
+                  print(
+                    "Selected background color: $selectedColor, in jsonSettings: ${jsonSettings["settings"][0]["bg_color"]}]}, $tempConfig",
+                  );
+                  writeSettingsToFile(jsonSettings);
                 });
               }
             },
           ),
         ),
-        const SizedBox(height: 20),
+
+        Expanded(
+          child: ListTile(
+            title: Text("Text Color"),
+
+            trailing: Row(
+              mainAxisSize:
+                  MainAxisSize
+                      .min, // Ensures the Row takes up only the necessary space
+              children: [
+                // Color Circle
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: Color(
+                      int.parse(
+                        "FF${jsonSettings["settings"][0]["text_color"]}", // Prepend "FF" for full opacity
+                        radix: 16,
+                      ),
+                    ),
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.black),
+                  ),
+                ),
+                const SizedBox(
+                  width: 397,
+                ), // Add spacing between the circle and the button
+                // Restore Default Button
+                OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      jsonSettings["settings"][0]["text_color"] =
+                          "ff000000"; // Default grey color
+                      writeSettingsToFile(
+                        jsonSettings,
+                      ); // Save the updated settings
+                    });
+                  },
+                  child: const Text("Restore Default (Black)"),
+                ),
+              ],
+            ),
+
+            // Text("Background Color"),
+            onTap: () async {
+              Color? selectedTextColor = await showDialog<Color>(
+                context: context,
+                builder: (BuildContext context) {
+                  Color tempTextColor =
+                      Color(
+                        int.parse(
+                          jsonSettings["settings"][0]["text_color"],
+                          radix: 16,
+                        ),
+                      ) ??
+                      Colors.red;
+                  return AlertDialog(
+                    title: const Text("Pick a Text Color"),
+                    content: SingleChildScrollView(
+                      child: ColorPicker(
+                        pickerColor: tempTextColor,
+                        onColorChanged: (color) {
+                          setState(() {
+                            tempTextColor = color;
+                            jsonSettings["settings"][0]["text_color"] =
+                                tempTextColor.toARGB32().toRadixString(16);
+                          });
+                        },
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        child: const Text("Cancel"),
+                        onPressed: () {
+                          Navigator.of(context).pop(null);
+                        },
+                      ),
+                      TextButton(
+                        child: const Text("Select"),
+                        onPressed: () {
+                          ;
+                          Navigator.of(context).pop(tempColor);
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+
+              if (selectedTextColor != null) {
+                setState(() {
+                  print(
+                    "Selected background color: $selectedTextColor, in jsonSettings: ${jsonSettings["settings"][0]["bg_color"]}]}, $tempConfig",
+                  );
+                  writeSettingsToFile(jsonSettings);
+                });
+              }
+            },
+          ),
+        ),
+
+        Expanded(
+          child: ListTile(
+            title: Text("Text Size"),
+
+            trailing: Row(
+              mainAxisSize:
+                  MainAxisSize
+                      .min, // Ensures the Row takes up only the necessary space
+              children: [
+                Slider(
+                  value: textSize,
+                  min: 10.0,
+                  max: 25.0,
+                  divisions: 20, // Number of steps
+                  label: textSize.toStringAsFixed(0),
+                  onChanged: (double value) {
+                    setState(() {
+                      textSize = value;
+                      jsonSettings["settings"][0]["text_size"] = value.toInt();
+                      writeSettingsToFile(
+                        jsonSettings,
+                      ); // Save the updated text size
+                    });
+                  },
+                ),
+
+                Text(
+                  "Sample: ${textSize.toStringAsFixed(0)}",
+                  style: TextStyle(fontSize: textSize),
+                ),
+                const SizedBox(width: 200),
+                OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      jsonSettings["settings"][0]["text_size"] =
+                          16; // Default grey color
+                      writeSettingsToFile(
+                        jsonSettings,
+                      ); // Save the updated settings
+                    });
+                  },
+                  child: const Text("Restore Default (16)"),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

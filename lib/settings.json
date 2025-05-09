@@ -1,11 +1,11 @@
 {
   "settings": [
     {
-      "bg_color": "red",
-      "text_color": "white",
-      "text_size": 16,
-      "opacity": 1.0,
-      "ontop": "true",
+      "bg_color": "ffd1cfcf",
+      "text_color": "ff071491",
+      "text_size": 15,
+      "opacity": 0.9665727699530499,
+      "ontop": true,
       "items_row": 3
     }
   ]

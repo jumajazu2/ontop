@@ -218,7 +218,12 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: null, // No app bar to match frameless window
-      backgroundColor: const Color.fromARGB(255, 148, 167, 176),
+      backgroundColor: Color(
+        int.parse(
+          "FF${jsonSettings["settings"][0]["bg_color"]}", // Prepend "FF" for full opacity
+          radix: 16,
+        ),
+      ), //background color of the main window
       body: GestureDetector(
         behavior:
             HitTestBehavior.opaque, // Ensure GestureDetector captures events
@@ -281,7 +286,12 @@ class _MyHomePageState extends State<MyHomePage> {
         height: 15,
         child: FloatingActionButton(
           onPressed: () {
-            showSettingsPopup(context);
+            showSettingsPopup(context, () {
+              setState(() {
+                // Trigger a rebuild of the main program's UI
+                print("Settings dialog closed. Returning to main program.");
+              });
+            });
           },
           tooltip: 'Settings',
           child: const Icon(Icons.settings, size: 15),
