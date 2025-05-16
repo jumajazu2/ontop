@@ -1,13 +1,18 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:ontop/ha_api.dart';
 import 'package:ontop/main.dart';
 import 'dart:io';
 import 'package:ontop/logger.dart';
+import 'package:ontop/playVLC.dart';
+import 'package:ontop/settings.dart';
 
 //
 int numberEntities = 0;
+bool isRtspPlayerScreenOpen = false;
 Future createTextSpan(
+  BuildContext context,
   jsonData,
 ) async //create textspan with current values to be displayed
 {
@@ -41,9 +46,37 @@ Future createTextSpan(
       jsonData["API"][0]["baseURL"],
       headers,
     ); //read value from API
+
+    //check if video trigger, if true, launch live video stream
+    if (jsonData["entities"][index]["type"] == "video stream trigger" &&
+        readFromApi[1] == "on") {
+      //to check if RtspPlayerScreen is already open nto to open it repeatedly
+
+      if (!isRtspPlayerScreenOpen) {
+        isRtspPlayerScreenOpen = true;
+        getWindowInfo();
+        setSettingsWindowPositionSize();
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RtspPlayerScreen()),
+        ).then((_) {
+          isRtspPlayerScreenOpen = false;
+          restoreWindowPositionSize();
+        });
+      }
+      // Create an instance of the player screen
+
+      print("Video trigger detected, launching video stream");
+      //launchVideoStream(jsonData["entities"][index]["entityHA"]);
+      //launchVLCPlayer(jsonData["entities"][index]["entityHA"]);
+      //launchVLCPlayer(jsonData["entities"][index]["entityHA"]);
+    }
+
     String name = jsonData["entities"][index]["name"];
     String unit = jsonData["entities"][index]["unit"];
     String icon = jsonData["entities"][index]["icon"];
+    int rounding = (jsonData["entities"][index]["rounding"]) ?? 0;
 
     if (jsonData["entities"][index]["attribute"] == "") {
       listResults[index] = [
@@ -63,6 +96,11 @@ Future createTextSpan(
       ];
     }
     print("value write at position $index: ${listResults[index]}");
+
+    listResults[index][2] = roundValue(
+      listResults[index][2],
+      rounding,
+    ); //round the value to x decimal places
 
     //log the value written to the list
     /*
@@ -115,8 +153,20 @@ Future createTextSpan(
   return resultsOut;
 }
 
-Future? launch() async {
-  await createTextSpan(jsonData);
+String roundValue(dynamic value, int decimalPlaces) {
+  if (value is num) {
+    return value.toDouble().toStringAsFixed(decimalPlaces);
+  } else if (value is String) {
+    double? parsedValue = double.tryParse(value);
+    if (parsedValue != null) {
+      return parsedValue.toStringAsFixed(decimalPlaces);
+    }
+  }
+  return value; // Fallback for non-numeric values
+}
+
+Future? launch(BuildContext context) async {
+  await createTextSpan(context, jsonData);
 }
 
 //List<dynamic> users = jsonData["users"];

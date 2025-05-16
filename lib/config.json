@@ -7,7 +7,8 @@
       "name": "Load",
       "icon": "bolt",
       "icon_color": "red",
-      "unit": "W"
+      "unit": "W",
+      "rounding": 0
     },
     {
       "entityHA": "sensor.axking_get_status_pv_input_power",
@@ -16,7 +17,8 @@
       "name": "PV",
       "icon": "solar_power",
       "icon_color": "yellow",
-      "unit": "W"
+      "unit": "W",
+      "rounding": 0
     },
     {
       "entityHA": "sensor.axking_get_status_battery_voltage",
@@ -25,7 +27,8 @@
       "name": "Batt",
       "icon": "battery_3_bar",
       "icon_color": "blue",
-      "unit": "V"
+      "unit": "V",
+      "rounding": 1
     },
     {
       "entityHA": "sensor.battery_current",
@@ -34,7 +37,8 @@
       "name": "Current",
       "icon": "battery_charging_full",
       "icon_color": "blue",
-      "unit": "A"
+      "unit": "A",
+      "rounding": 0
     },
     {
       "entityHA": "sensor.shellygas_3c6105f65548_gas_concentration",
@@ -43,7 +47,8 @@
       "name": "Gas",
       "icon": "report_problem_outlined",
       "icon_color": "red",
-      "unit": "ppm"
+      "unit": "ppm",
+      "rounding": 0
     },
     {
       "entityHA": "sensor.esphome_web_499a10_sht40_temperature",
@@ -52,7 +57,8 @@
       "name": "DHW",
       "icon": "device_thermostat",
       "icon_color": "red",
-      "unit": "C"
+      "unit": "C",
+      "rounding": 1
     },
     {
       "entityHA": "sensor.axking_get_status_inverter_charge_status",
@@ -61,7 +67,8 @@
       "name": "SCC",
       "icon": "solar_power_outlined",
       "icon_color": "white",
-      "unit": ""
+      "unit": "",
+      "rounding": 0
     },
     {
       "entityHA": "switch.tapo_plug_2",
@@ -70,7 +77,8 @@
       "name": "Extractor",
       "icon": "fan",
       "icon_color": "orange",
-      "unit": ""
+      "unit": "",
+      "rounding": 0
     },
     {
       "entityHA": "sensor.tapo_plug_18_current_power",
@@ -79,7 +87,8 @@
       "name": "DHW Power",
       "icon": "flash_on",
       "icon_color": "orange",
-      "unit": "W"
+      "unit": "W",
+      "rounding": 0
     },
     {
       "entityHA": "fan.esphome_web_4f3eb4_pwm_ouput_2",
@@ -88,7 +97,19 @@
       "name": "DHW percentage",
       "icon": "speed",
       "icon_color": "red",
-      "unit": "%"
+      "unit": "%",
+      "rounding": 0
+    },
+    {
+      "entityHA": "binary_sensor.reolink_video_doorbell_poe_navstevnik",
+      "attribute": "",
+      "type": "video stream trigger",
+      "name": "Reolink Doorbell",
+      "icon": "notifications_on",
+      "icon_color": "blue",
+      "unit": "",
+      "rounding": 0,
+      "videoURL": "rtsp://admin:Vojvodova77@192.168.1.27:554/h264Preview_01_main"
     }
   ],
   "API": [

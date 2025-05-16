@@ -9,7 +9,8 @@ import 'package:screen_retriever/screen_retriever.dart';
 import 'dart:convert';
 import 'package:ontop/icons.dart'; // Adjust the path as needed
 import 'package:ontop/entities_editor.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart'; // Adjust the path as needed
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:ontop/playVLC.dart';
 // Import the EntityEditor widget
 
 Future<void> savePreference(String key, String value) async {
@@ -255,14 +256,14 @@ void showSettingsPopup(BuildContext context, VoidCallback onClose) async {
                                     },
                                   ),
 
-                                  SizedBox(height: 200, child: ConfigEditor()),
+                                  SizedBox(height: 250, child: ConfigEditor()),
 
                                   Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "Transparency: ${settings.opacityValue.toInt()}",
+                                        "Transparency: ${settings.opacityValue.toInt()} %",
                                       ),
                                       Slider(
                                         min: 20,
@@ -299,6 +300,17 @@ void showSettingsPopup(BuildContext context, VoidCallback onClose) async {
               Navigator.of(context).pop();
               print("window position on Close: $position");
               restoreWindowPositionSize();
+            },
+          ),
+          SizedBox(height: 20),
+          TextButton(
+            child: const Text("Open VLC"),
+            onPressed: () {
+              print("opening VLC");
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => RtspPlayerScreen()),
+              );
             },
           ),
         ],
@@ -361,7 +373,9 @@ class _ConfigEditorState extends State<ConfigEditor> {
     ];
   }
 */
-  double textSize = 16.0; // Default text size
+  double textSize =
+      (jsonSettings["settings"][0]["text_size"] as num)
+          .toDouble(); // Default text size
   @override
   Widget build(BuildContext context) {
     Color tempColor = Color(
@@ -508,7 +522,7 @@ class _ConfigEditorState extends State<ConfigEditor> {
                   onPressed: () {
                     setState(() {
                       jsonSettings["settings"][0]["text_color"] =
-                          "ff000000"; // Default grey color
+                          "ff000000"; // Default black color
                       writeSettingsToFile(
                         jsonSettings,
                       ); // Save the updated settings
@@ -611,8 +625,8 @@ class _ConfigEditorState extends State<ConfigEditor> {
                 OutlinedButton(
                   onPressed: () {
                     setState(() {
-                      jsonSettings["settings"][0]["text_size"] =
-                          16; // Default grey color
+                      jsonSettings["settings"][0]["text_size"] = 16;
+                      textSize = 16; // Default grey color
                       writeSettingsToFile(
                         jsonSettings,
                       ); // Save the updated settings
@@ -624,6 +638,29 @@ class _ConfigEditorState extends State<ConfigEditor> {
             ),
           ),
         ),
+
+        const SizedBox(height: 10),
+        // Dropdown for Icon Color
+        DropdownButtonFormField<String>(
+          value: jsonSettings["settings"][0]["items_row"].toString(),
+          items:
+              ["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+          onChanged: (value) {
+            //setState(() {
+            jsonSettings["settings"][0]["items_row"] = int.parse(value!);
+            //});
+          },
+          decoration: const InputDecoration(
+            labelText: "Select the Number of Items per Row",
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 30),
       ],
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:ontop/main.dart';
 import 'package:ontop/entities.dart';
@@ -102,6 +104,11 @@ class GenerateTable extends StatelessWidget {
                                         ? iconMap[iconKey]
                                         : null, // Fallback to warning icon if not found
                                     color: iconColor[iconCol],
+                                    size:
+                                        (jsonSettings["settings"][0]["text_size"]
+                                                as num)
+                                            .toDouble() +
+                                        7, // Default icon size if not specified
                                   )
                                   : Text(
                                     item[0], // Display name if no icon is specified
@@ -115,24 +122,45 @@ class GenerateTable extends StatelessWidget {
                               ), // Space between icon and text
                               // Display the value from item[2]
                               Text(
-                                item[2]
-                                    .toString(), // Display value (from item[2])
+                                item[2].toString().length > 7
+                                    ? "${item[2].toString().substring(0, 7)}…" // Truncate and add ellipsis
+                                    : item[2]
+                                        .toString(), // Display value (from item[2])
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
-                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  //fontFamily: "monospace",
+                                  color: Color(
+                                    int.parse(
+                                      "FF${jsonSettings["settings"][0]["text_color"]}", // Prepend "FF" for full opacity
+                                      radix: 16,
+                                    ),
+                                  ),
+                                  fontSize:
+                                      (jsonSettings["settings"][0]["text_size"]
+                                              as num)
+                                          .toDouble(), // Default font size if not specified
                                 ),
                               ),
                               SizedBox(
-                                width: 2.0,
+                                width: 4.0,
                               ), // Space between value and unit
                               // Display the unit from item[3]
                               Text(
                                 item[3]
                                     .toString(), // Display unit (from item[3])
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                  //fontFamily: "monospace",
+                                  color: Color(
+                                    int.parse(
+                                      "FF${jsonSettings["settings"][0]["text_color"]}", // Prepend "FF" for full opacity
+                                      radix: 16,
+                                    ),
+                                  ),
+                                  fontSize:
+                                      (jsonSettings["settings"][0]["text_size"]
+                                              as num)
+                                          .toDouble(),
                                 ),
                               ),
                             ],

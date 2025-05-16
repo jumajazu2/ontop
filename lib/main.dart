@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:media_kit/media_kit.dart';
 import 'package:ontop/generate_table.dart';
 import 'package:window_manager/window_manager.dart';
 //import 'package:http/http.dart' as http;
@@ -26,9 +27,9 @@ List<dynamic> listResults = [
 ];
 Offset newPositionFinal = Offset.zero;
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
   // Initialize window manager
+  MediaKit.ensureInitialized();
+  await WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
   await loadJsonFromFile(); // Load JSON config from file
   await loadSettingsFromFile();
@@ -174,7 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       listResults.clear; // Clear the list before adding new data
       resultsOut.clear;
-      launch();
+      launch(context);
 
       var sinceLastBuild = secondsSinceLastBuild();
 

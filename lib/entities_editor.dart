@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:ontop/icons.dart'; // Import the icon and color mappings
 import 'package:ontop/logger.dart';
 import 'package:ontop/file_handling.dart'; // Import file handling functions
 import 'dart:convert'; // Import for JSON encoding/decoding
 import 'package:ontop/main.dart';
 import 'package:ontop/ha_api.dart';
-
-
-
 
 class EntityEditor extends StatefulWidget {
   @override
@@ -105,6 +103,7 @@ class _EntityEditorState extends State<EntityEditor> {
         "icon": "",
         "icon_color": "",
         "unit": "Enter Unit",
+        "rounding": 0,
       });
     });
   }
@@ -119,6 +118,7 @@ class _EntityEditorState extends State<EntityEditor> {
         "icon": "",
         "icon_color": "",
         "unit": "Enter Unit",
+        "rounding": 0,
       });
     });
   }
@@ -240,7 +240,17 @@ class _EntityEditorState extends State<EntityEditor> {
                         // Filterable Dropdown for Entity ID
                         Row(
                           children: [
-                            const Text("Entity ID: "),
+                            Text(
+                              "${index + 1}",
+                              style: TextStyle(
+                                fontSize: 46.0, // Set the desired text size
+                                fontWeight:
+                                    FontWeight
+                                        .bold, // Optional: Set font weight
+                                // Optional: Set text color
+                              ),
+                            ),
+                            const Text(" Entity ID: "),
                             Expanded(
                               child: Column(
                                 children: [
@@ -331,96 +341,210 @@ class _EntityEditorState extends State<EntityEditor> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        // Editable fields for other properties
-                        TextFormField(
-                          initialValue: entity["name"],
-                          decoration: const InputDecoration(
-                            labelText: "Name",
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              tempEntities[index]["name"] = value;
-                            });
-                          },
+                        Row(
+                          children: [
+                            // DropdownButtonFormField for "Select Type"
+                            Expanded(
+                              flex:
+                                  2, // Adjust the flex value to control the width ratio
+                              child: DropdownButtonFormField<String>(
+                                value: entity["type"].toString(),
+                                items:
+                                    [
+                                      "value",
+                                      "switch",
+                                      "video stream trigger",
+                                    ].map((value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    tempEntities[index]["type"] = value ?? "";
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                  labelText:
+                                      "Select Type (Value, Switch, Video Stream Trigger)",
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ), // Add spacing between the widgets
+                            // TextFormField for "Name"
+                            Expanded(
+                              flex:
+                                  3, // Adjust the flex value to control the width ratio
+                              child: TextFormField(
+                                initialValue: entity["name"],
+                                decoration: const InputDecoration(
+                                  labelText: "Name",
+                                  border: OutlineInputBorder(),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    tempEntities[index]["name"] = value;
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(width: 10),
                         const SizedBox(height: 10),
-                        // Dropdown for Icon
-                        DropdownButtonFormField<String>(
-                          value:
-                              entity["icon"].isNotEmpty ? entity["icon"] : null,
-                          items:
-                              iconMap.keys.map((iconKey) {
-                                return DropdownMenuItem<String>(
-                                  value: iconKey,
-                                  child: Row(
-                                    children: [
-                                      Icon(iconMap[iconKey]),
-                                      const SizedBox(width: 8),
-                                      Text(iconKey),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              tempEntities[index]["icon"] = value ?? "";
-                            });
-                          },
-                          decoration: const InputDecoration(
-                            labelText: "Select Icon",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        // Dropdown for Icon Color
-                        DropdownButtonFormField<String>(
-                          value:
-                              entity["icon_color"].isNotEmpty
-                                  ? entity["icon_color"]
-                                  : null,
-                          items:
-                              iconColor.keys.map((colorKey) {
-                                return DropdownMenuItem<String>(
-                                  value: colorKey,
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 16,
-                                        height: 16,
-                                        color: iconColor[colorKey],
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Text(colorKey),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                          onChanged: (value) {
-                            //setState(() {
-                            tempEntities[index]["icon_color"] = value ?? "";
-                            //});
-                          },
-                          decoration: const InputDecoration(
-                            labelText: "Select Icon Color",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          initialValue: entity["unit"],
-                          decoration: const InputDecoration(
-                            labelText: "Unit",
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              tempEntities[index]["unit"] = value;
-                            });
-                          },
-                        ),
+                        tempEntities[index]["type"] == "video stream trigger"
+                            ? TextFormField(
+                              decoration: const InputDecoration(
+                                labelText: "Enter Video Stream URL",
+                                border: OutlineInputBorder(),
+                              ),
+                              onChanged: (value) {
+                                setState(() {
+                                  tempEntities[index]["videoURL"] = value;
+                                });
+                              },
+                            )
+                            : const SizedBox.shrink(),
+
                         const SizedBox(height: 10),
 
+                        // Editable fields for other properties
+                        Row(
+                          children: [
+                            // TextFormField for "Name"
+                            // Add spacing between the widgets
+                            // DropdownButtonFormField for "Select Icon"
+                            Expanded(
+                              flex:
+                                  2, // Select Icon takes 1 portion of the available space
+                              child: DropdownButtonFormField<String>(
+                                value:
+                                    entity["icon"].isNotEmpty
+                                        ? entity["icon"]
+                                        : null,
+                                items:
+                                    iconMap.keys.map((iconKey) {
+                                      return DropdownMenuItem<String>(
+                                        value: iconKey,
+                                        child: Row(
+                                          children: [
+                                            Icon(iconMap[iconKey]),
+                                            const SizedBox(width: 8),
+                                            Text(iconKey),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    tempEntities[index]["icon"] = value ?? "";
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                  labelText: "Select Icon",
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ), // Add spacing between the widgets
+                            // DropdownButtonFormField for "Select Icon Color"
+                            Expanded(
+                              flex:
+                                  1, // Select Icon Color takes 1 portion of the available space
+                              child: DropdownButtonFormField<String>(
+                                value:
+                                    entity["icon_color"].isNotEmpty
+                                        ? entity["icon_color"]
+                                        : null,
+                                items:
+                                    iconColor.keys.map((colorKey) {
+                                      return DropdownMenuItem<String>(
+                                        value: colorKey,
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 16,
+                                              height: 16,
+                                              color: iconColor[colorKey],
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(colorKey),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    tempEntities[index]["icon_color"] =
+                                        value ?? "";
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                  labelText: "Select Icon Color",
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            // TextFormField for "Unit"
+                            Expanded(
+                              flex:
+                                  2, // Adjust the flex value to control the width ratio
+                              child: TextFormField(
+                                initialValue: entity["unit"],
+                                decoration: const InputDecoration(
+                                  labelText: "Unit",
+                                  border: OutlineInputBorder(),
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    tempEntities[index]["unit"] = value;
+                                  });
+                                },
+                              ),
+                            ),
+                            const SizedBox(
+                              width: 10,
+                            ), // Add spacing between the two widgets
+                            // DropdownButtonFormField for "Rounding"
+                            Expanded(
+                              flex:
+                                  2, // Adjust the flex value to control the width ratio
+                              child: DropdownButtonFormField<String>(
+                                value: entity["rounding"].toString(),
+                                items:
+                                    ["0", "1", "2", "3", "4", "5", "6"].map((
+                                      value,
+                                    ) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
+                                onChanged: (value) {
+                                  tempEntities[index]["rounding"] = int.parse(
+                                    value!,
+                                  );
+                                },
+                                decoration: const InputDecoration(
+                                  labelText: "Rounding (Decimal Places)",
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 30),
                         // Delete button
                         Align(
                           alignment: Alignment.centerRight,
